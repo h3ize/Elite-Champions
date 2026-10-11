@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -36,9 +36,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,13 +55,24 @@ public class TowerPiece extends StructurePiece {
     static final int[] WIN = {-12, -6, 0, 6, 12};
     /** Interior and exterior pilaster positions along each face (between the windows). */
     static final int[] PILASTER = {-9, -3, 3, 9};
-    /** Prop spots on every floor (x, z): clear of the stairs, chests, pillars, vault alcove and the secret closet. */
+    /** Prop spots on every floor (x, z): clear of the stairs, chests, pillars and vault alcove. */
     static final int[][] SPOTS = {{11, 4}, {11, -4}, {-11, 4}, {-11, -4}, {11, 7}, {11, -7}, {-11, 7}, {-11, -7}};
-    /** Floors that are Trial Spawner rooms (clear them for a key); floor 0 keeps a classic spawner. */
-    static final int[] TRIAL_TOTAL = {0, 8, 10, 12, 6};
-    static final int[] TRIAL_SIMUL = {0, 3, 4, 5, 3};
+    /** Every floor is a Trial Spawner room (clear it for a key). */
+    static final int[] TRIAL_TOTAL = {6, 8, 10, 12, 6};
+    static final int[] TRIAL_SIMUL = {2, 3, 4, 5, 3};
+    /** Cooldown after a trial spawner is beaten, in ticks (40 = 2 seconds). */
+    static final int SPAWNER_COOLDOWN = 40;
+    /** The boss spawner stays dormant for a long time after the boss dies (1200000 ticks = ~16 hours). */
+    static final int BOSS_COOLDOWN = 1200000;
     static final String[] ARMOR_TIER = {"", "chainmail", "iron", "diamond", "netherite"};
-    static final String[] TOOL_TIER = {"", "stone", "iron", "diamond", "netherite"};
+    static final String[] TOOL_TIER = {"wooden", "stone", "iron", "diamond", "netherite"};
+    /** Armour-stand gear: no netherite, ever. Duplicates make the common sets more likely. */
+    static final String[] STAND_ARMOR = {"leather", "chainmail", "golden", "golden", "iron", "iron", "iron", "diamond", "diamond"};
+    static final String[] ARMOR_SLOTS = {"boots", "leggings", "chestplate", "helmet"};
+    static final String[] STAND_TOOLS = {"iron_sword", "iron_axe", "iron_pickaxe", "iron_shovel", "iron_hoe", "stone_sword",
+            "stone_axe", "stone_pickaxe", "golden_sword", "golden_axe", "golden_pickaxe", "diamond_sword", "diamond_axe",
+            "diamond_pickaxe", "diamond_shovel", "trident", "bow"};
+    static boolean has(int[] arr, int v) { for (int a : arr) if (a == v) return true; return false; }
     static final Set<EntityType<?>> ARMORED = Set.<EntityType<?>>of(EntityType.ZOMBIE, EntityType.HUSK, EntityType.DROWNED,
             EntityType.SKELETON, EntityType.STRAY, EntityType.BOGGED, EntityType.WITHER_SKELETON, EntityType.PIGLIN,
             EntityType.PIGLIN_BRUTE, EntityType.ZOMBIFIED_PIGLIN, EntityType.PILLAGER, EntityType.VINDICATOR);
@@ -180,6 +189,36 @@ public class TowerPiece extends StructurePiece {
             };
         }
 
+        /** Second carpet colour, used for rug borders and runner edges. */
+        BlockState carpetAlt() {
+            return switch (t) {
+                case NETHER, DEEP_DARK -> Blocks.GRAY_CARPET.defaultBlockState();
+                case END, DARK_FOREST -> Blocks.MAGENTA_CARPET.defaultBlockState();
+                case CHERRY -> Blocks.WHITE_CARPET.defaultBlockState();
+                case OCEAN -> Blocks.LIGHT_BLUE_CARPET.defaultBlockState();
+                case WARPED -> Blocks.LIGHT_BLUE_CARPET.defaultBlockState();
+                case CRIMSON -> Blocks.BLACK_CARPET.defaultBlockState();
+                case OAK, JUNGLE, SWAMP -> Blocks.LIME_CARPET.defaultBlockState();
+                case PILLAGER -> Blocks.BLACK_CARPET.defaultBlockState();
+                case TAIGA, BADLANDS, SAVANNA -> Blocks.YELLOW_CARPET.defaultBlockState();
+                default -> Blocks.WHITE_CARPET.defaultBlockState();
+            };
+        }
+
+        BlockState stairBlock(Direction facing, boolean upsideDown) {
+            BlockState st = t.stairs.defaultBlockState().setValue(StairBlock.FACING, facing);
+            return upsideDown ? st.setValue(BlockStateProperties.HALF, Half.TOP) : st;
+        }
+        BlockState slabTop() { return t.slab.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.TOP); }
+        Direction dirOf(int ddx, int ddz) {
+            if (ddx != 0) return ddx > 0 ? Direction.EAST : Direction.WEST;
+            return ddz > 0 ? Direction.SOUTH : Direction.NORTH;
+        }
+        /** Direction pointing from an outer cell toward the nearest wall face (used for corbels). */
+        Direction towardWall(int dx, int dz) {
+            return abs(dx) >= abs(dz) ? (dx > 0 ? Direction.WEST : Direction.EAST) : (dz > 0 ? Direction.NORTH : Direction.SOUTH);
+        }
+
         ResourceKey<LootTable> loot() {
             ArrayList<String> pool = new ArrayList<>(COMMON_LOOT);
             switch (t) {
@@ -190,28 +229,41 @@ public class TowerPiece extends StructurePiece {
             }
             return key(pool.get(rnd.nextInt(pool.size())));
         }
-        /** Theme loot for the treasury floor, the secret closets and the four top-floor chests. */
+        /** Theme loot for the treasury floor, the four top-floor chests. */
         ResourceKey<LootTable> treasureKey() {
             return ResourceKey.create(Registries.LOOT_TABLE,
                     ResourceLocation.fromNamespaceAndPath(DimensionalTowers.MOD_ID, "chests/treasure_" + t.id));
+        }
+        ResourceKey<LootTable> barrelKey() {
+            return ResourceKey.create(Registries.LOOT_TABLE,
+                    ResourceLocation.fromNamespaceAndPath(DimensionalTowers.MOD_ID, "chests/barrel"));
         }
         ResourceKey<LootTable> key(String p) {
             return ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace(p));
         }
 
-        void doubleChest(int dx, int y, int dz, Direction f, ResourceKey<LootTable> lootKey) {
-            BlockState left = Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, f).setValue(ChestBlock.TYPE, ChestType.LEFT);
-            Direction toPartner = ChestBlock.getConnectedDirection(left);
-            BlockPos p1 = new BlockPos(cx + dx, y, cz + dz);
-            BlockPos p2 = p1.relative(toPartner);
-            if (box.isInside(p1)) {
-                level.setBlock(p1, left, 2);
-                RandomizableContainer.setBlockEntityLootTable(level, rnd, p1, lootKey);
-            }
-            if (box.isInside(p2)) {
-                level.setBlock(p2, left.setValue(ChestBlock.TYPE, ChestType.RIGHT), 2);
-                RandomizableContainer.setBlockEntityLootTable(level, rnd, p2, lootKey);
-            }
+        /** A single chest with the given loot table, facing the room. */
+        void chestAt(BlockPos p, Direction f, ResourceKey<LootTable> lootKey) {
+            if (p.getY() > yMax || !box.isInside(p)) return;
+            level.setBlock(p, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, f), 2);
+            RandomizableContainer.setBlockEntityLootTable(level, rnd, p, lootKey);
+        }
+
+        /** Wall-centre chest shrine: pillars either side, a trim lintel and floor lanterns. */
+        void chestShrine(int face, int b, ResourceKey<LootTable> lootKey) {
+            for (int y = b + 1; y <= b + 3; y++) { fs(face, -1, I, y, t.pillar); fs(face, 1, I, y, t.pillar); }
+            fs(face, 0, I, b + 3, t.trim);
+            fs(face, -1, I - 1, b + 1, t.lanternStanding);
+            fs(face, 1, I - 1, b + 1, t.lanternStanding);
+            chestAt(pfs(face, 0, I, b + 1), inward(face), lootKey);
+        }
+
+        /** Barrel in a wall nook, lid facing the room, filled from the early-game barrel loot table. */
+        void barrelAt(int face, int tt, int y) {
+            BlockPos p = pfs(face, tt, I, y);
+            if (y > yMax || !box.isInside(p)) return;
+            level.setBlock(p, barrel.setValue(BlockStateProperties.FACING, inward(face)), 2);
+            RandomizableContainer.setBlockEntityLootTable(level, rnd, p, barrelKey());
         }
 
         void blockEntityNbt(BlockPos pos, String snbt) {
@@ -224,21 +276,6 @@ public class TowerPiece extends StructurePiece {
         }
 
         // ------------------------------------------------------------------ spawners
-
-        /** Classic infinite spawner (ground floor only): weak half of the theme's mob list, light ignored. */
-        void monsterSpawner(int dx, int y, int dz, int k) {
-            BlockPos p = new BlockPos(cx + dx, y, cz + dz);
-            if (y > yMax || !box.isInside(p)) return;
-            level.setBlock(p, Blocks.SPAWNER.defaultBlockState(), 2);
-            List<EntityType<?>> list = t.mobsForFloor(k);
-            EntityType<?> type = list.get(rnd.nextInt(list.size()));
-            String id = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
-            blockEntityNbt(p, "{SpawnData:{entity:{id:'" + id + "'},custom_spawn_rules:{"
-                    + "block_light_limit:{min_inclusive:0,max_inclusive:15},"
-                    + "sky_light_limit:{min_inclusive:0,max_inclusive:15}}},"
-                    + "SpawnCount:3s,SpawnRange:7s,MaxNearbyEntities:8s,RequiredPlayerRange:24s,"
-                    + "MinSpawnDelay:200s,MaxSpawnDelay:500s}");
-        }
 
         String weaponFor(EntityType<?> type, int k) {
             if (type == EntityType.SKELETON || type == EntityType.STRAY || type == EntityType.BOGGED) return "bow";
@@ -278,43 +315,38 @@ public class TowerPiece extends StructurePiece {
         }
 
         /**
-         * Clearable floor: a Trial Spawner. Kill the wave and it ejects a regular trial key, which opens this floor's vault.
-         * Mob list, counts, armour and effects all scale with the floor number.
+         * Clearable floor: a Trial Spawner that spawns ONE mob type (picked per spawner from the floor's list).
+         * Kill the wave and it ejects a regular trial key, which opens this floor's vault. Counts, armour and effects
+         * scale with the floor number. The ominous config is identical so an omen can't swap in vanilla mobs.
          */
         void trialFloorSpawner(int dx, int y, int dz, int k) {
             BlockPos p = new BlockPos(cx + dx, y, cz + dz);
             if (y > yMax || !box.isInside(p)) return;
             level.setBlock(p, Blocks.TRIAL_SPAWNER.defaultBlockState(), 2);
-            Map<EntityType<?>, Integer> weights = new LinkedHashMap<>();
-            for (EntityType<?> e : t.mobsForFloor(k)) weights.merge(e, 1, Integer::sum);
-            StringBuilder pot = new StringBuilder();
-            for (Map.Entry<EntityType<?>, Integer> e : weights.entrySet()) {
-                if (pot.length() > 0) pot.append(',');
-                pot.append("{weight:").append(e.getValue()).append(",data:{entity:").append(mobNbt(e.getKey(), k)).append("}}");
-            }
-            blockEntityNbt(p, "{normal_config:{spawn_range:6,total_mobs:" + TRIAL_TOTAL[k] + ".0f,simultaneous_mobs:"
-                    + TRIAL_SIMUL[k] + ".0f,total_mobs_added_per_player:3.0f,simultaneous_mobs_added_per_player:1.0f,"
-                    + "ticks_between_spawn:30,spawn_potentials:[" + pot + "],"
-                    + "loot_tables_to_eject:[{weight:1,data:'minecraft:spawners/trial_chamber/key'}]},"
-                    + "required_player_range:14,target_cooldown_length:36000}");
+            List<EntityType<?>> choices = t.mobsForFloor(k);
+            EntityType<?> type = choices.get(rnd.nextInt(choices.size()));
+            String config = "{spawn_range:6,total_mobs:" + TRIAL_TOTAL[k] + ".0f,simultaneous_mobs:" + TRIAL_SIMUL[k]
+                    + ".0f,total_mobs_added_per_player:3.0f,simultaneous_mobs_added_per_player:1.0f,ticks_between_spawn:30,"
+                    + "spawn_potentials:[{weight:1,data:{entity:" + mobNbt(type, k) + "}}],"
+                    + "loot_tables_to_eject:[{weight:1,data:'minecraft:spawners/trial_chamber/key'}]}";
+            blockEntityNbt(p, "{normal_config:" + config + ",ominous_config:" + config
+                    + ",required_player_range:14,target_cooldown_length:" + SPAWNER_COOLDOWN + "}");
         }
 
-        /** Boss Trial Spawner: one boss from the theme's pool, then it ejects the ominous trial key. */
+        /** Boss Trial Spawner: exactly one boss type for this tower (picked at generation), then it ejects the ominous trial key. */
         void bossTrialSpawner(int dx, int y, int dz) {
             BlockPos p = new BlockPos(cx + dx, y, cz + dz);
             if (y > yMax || !box.isInside(p)) return;
             level.setBlock(p, Blocks.TRIAL_SPAWNER.defaultBlockState(), 2);
-            StringBuilder pot = new StringBuilder();
-            for (String id : t.bosses) {
-                if (pot.length() > 0) pot.append(',');
-                // the theme tag is how the boss knows which tower it belongs to (minion waves, abilities)
-                pot.append("{weight:1,data:{entity:{id:'").append(id).append("',Tags:['").append(t.bossTag()).append("']}}}");
-            }
-            blockEntityNbt(p, "{normal_config:{spawn_range:5,total_mobs:1.0f,simultaneous_mobs:1.0f,"
+            String id = t.bosses[rnd.nextInt(t.bosses.length)];
+            // the theme tag is how the boss knows which tower it belongs to (minion waves, abilities)
+            String pot = "{weight:1,data:{entity:{id:'" + id + "',Tags:['" + t.bossTag() + "']}}}";
+            String config = "{spawn_range:5,total_mobs:1.0f,simultaneous_mobs:1.0f,"
                     + "total_mobs_added_per_player:0.0f,simultaneous_mobs_added_per_player:0.0f,ticks_between_spawn:40,"
                     + "spawn_potentials:[" + pot + "],"
-                    + "loot_tables_to_eject:[{weight:1,data:'dimtowers:spawners/boss_key'}]},"
-                    + "required_player_range:12,target_cooldown_length:1200000}");
+                    + "loot_tables_to_eject:[{weight:1,data:'dimtowers:spawners/boss_key'}]}";
+            blockEntityNbt(p, "{normal_config:" + config + ",ominous_config:" + config
+                    + ",required_player_range:12,target_cooldown_length:" + BOSS_COOLDOWN + "}");
         }
 
         // ------------------------------------------------------------------ helpers
@@ -352,22 +384,25 @@ public class TowerPiece extends StructurePiece {
             } catch (Exception ignored) { }
         }
 
-        /** Trimmed armour stand holding a weapon, facing the middle of the room. */
-        void armorStand(int dx, int y, int dz, String mat, String hand) {
-            String trim = ",components:{'minecraft:trim':{material:'minecraft:gold',pattern:'minecraft:" + t.trimPattern + "'}}";
-            String m = "minecraft:" + mat;
+        /**
+         * Armour stand with random gear: usually one full set, sometimes a mix of two materials (e.g. diamond with iron
+         * boots), occasionally a missing piece, plus a random tool. Never netherite, no trims.
+         */
+        void armorStand(int dx, int y, int dz) {
+            String base = STAND_ARMOR[rnd.nextInt(STAND_ARMOR.length)];
+            String other = STAND_ARMOR[rnd.nextInt(STAND_ARMOR.length)];
+            boolean mixed = !other.equals(base) && rnd.nextInt(10) < 5;
+            StringBuilder armor = new StringBuilder();
+            for (int i = 0; i < 4; i++) {
+                if (i > 0) armor.append(',');
+                if (rnd.nextInt(12) == 0) { armor.append("{}"); continue; }
+                String mat = mixed && rnd.nextBoolean() ? other : base;
+                armor.append("{id:'minecraft:").append(mat).append('_').append(ARMOR_SLOTS[i]).append("',count:1}");
+            }
+            String tool = STAND_TOOLS[rnd.nextInt(STAND_TOOLS.length)];
             float yaw = dx > 0 ? 90f : 270f;
             entity("{id:'minecraft:armor_stand',ShowArms:1b,NoBasePlate:1b,Invulnerable:1b,DisabledSlots:4144959,Rotation:[" + yaw + "f,0f],"
-                    + "ArmorItems:[{id:'" + m + "_boots',count:1" + trim + "},{id:'" + m + "_leggings',count:1" + trim + "},"
-                    + "{id:'" + m + "_chestplate',count:1" + trim + "},{id:'" + m + "_helmet',count:1" + trim + "}],"
-                    + "HandItems:[{id:'minecraft:" + hand + "',count:1},{}]}", cx + dx + 0.5, y, cz + dz + 0.5);
-        }
-
-        /** Item frame on a wall: (dx,y,dz) is the cell the frame occupies, dir the way it faces. */
-        void itemFrame(int dx, int y, int dz, Direction dir, String item) {
-            int x = cx + dx, z = cz + dz;
-            entity("{id:'minecraft:item_frame',Facing:" + dir.get3DDataValue() + "b,TileX:" + x + ",TileY:" + y + ",TileZ:" + z
-                    + ",Item:{id:'" + item + "',count:1}}", x + 0.5, y + 0.5, z + 0.5);
+                    + "ArmorItems:[" + armor + "],HandItems:[{id:'minecraft:" + tool + "',count:1},{}]}", cx + dx + 0.5, y, cz + dz + 0.5);
         }
 
         /** 1x1 painting, so it never needs more than the one wall cell. */
@@ -386,41 +421,6 @@ public class TowerPiece extends StructurePiece {
                     + "{pattern:'minecraft:border',color:'black'}]}";
         }
 
-        BlockState cracked() {
-            return switch (t) {
-                case OVERWORLD, DEEP_DARK -> Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState();
-                case NETHER, CRIMSON, WARPED -> Blocks.CRACKED_NETHER_BRICKS.defaultBlockState();
-                case PIGLIN -> Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
-                default -> Blocks.CRACKED_STONE_BRICKS.defaultBlockState();
-            };
-        }
-
-        /** Head or item that stands for this tower's first boss (trophies, pedestals). */
-        String trophyItem() {
-            return switch (t.bosses[0]) {
-                case "dimtowers:tower_boss" -> "minecraft:wither_skeleton_skull";
-                case "dimtowers:tower_zombie" -> "minecraft:zombie_head";
-                case "dimtowers:tower_skeleton" -> "minecraft:skeleton_skull";
-                case "dimtowers:tower_piglin" -> "minecraft:piglin_head";
-                case "dimtowers:tower_blaze" -> "minecraft:blaze_rod";
-                case "dimtowers:tower_spider" -> "minecraft:spider_eye";
-                case "dimtowers:tower_ender" -> "minecraft:dragon_head";
-                case "dimtowers:tower_slime" -> "minecraft:slime_ball";
-                case "dimtowers:tower_drowned" -> "minecraft:heart_of_the_sea";
-                default -> "minecraft:ominous_trial_key";
-            };
-        }
-        BlockState trophyHead() {
-            return switch (t.bosses[0]) {
-                case "dimtowers:tower_boss" -> Blocks.WITHER_SKELETON_SKULL.defaultBlockState();
-                case "dimtowers:tower_zombie" -> Blocks.ZOMBIE_HEAD.defaultBlockState();
-                case "dimtowers:tower_piglin" -> Blocks.PIGLIN_HEAD.defaultBlockState();
-                case "dimtowers:tower_ender" -> Blocks.DRAGON_HEAD.defaultBlockState();
-                default -> Blocks.SKELETON_SKULL.defaultBlockState();
-            };
-        }
-        String templateItem() { return "minecraft:" + t.trimPattern + "_armor_trim_smithing_template"; }
-
         void decoratedPot(int dx, int y, int dz, String contents) {
             String sh = "'minecraft:" + t.sherd + "_pottery_sherd'";
             String plain = "'minecraft:brick'";
@@ -431,42 +431,44 @@ public class TowerPiece extends StructurePiece {
 
         // ------------------------------------------------------------------ floor identities
 
-        /** Floor 1 (k=0): armory. Trimmed armour stands, anvils, grindstones, smithing tables. */
+        /** Floor 1 (k=0): armory. Armour stands with random gear, anvils, grindstones, smithing and fletching tables. */
         void armory(int b) {
-            String[] mats = {"iron", "chainmail", "golden", "diamond"};
-            String[] hands = {"iron_sword", "iron_axe", "golden_sword", "diamond_sword"};
             for (int i = 0; i < SPOTS.length; i++) {
                 int x = SPOTS[i][0], z = SPOTS[i][1];
                 switch (i % 4) {
-                    case 0, 2 -> armorStand(x, b + 1, z, mats[(i / 2) % 4], hands[(i / 2) % 4]);
+                    case 0, 2 -> armorStand(x, b + 1, z);
                     case 1 -> set(x, b + 1, z, i < 4 ? Blocks.ANVIL.defaultBlockState() : Blocks.GRINDSTONE.defaultBlockState());
                     default -> set(x, b + 1, z, i < 4 ? Blocks.SMITHING_TABLE.defaultBlockState() : Blocks.FLETCHING_TABLE.defaultBlockState());
                 }
             }
         }
 
-        /** Floor 2 (k=1): library. Enchanting tables backed by bookshelves, lecterns, brewing stands, book stacks. */
+        /** Floor 2 (k=1): library. Reading nooks with lecterns, desks lit by candles, bookshelf stacks, chiseled shelves. */
         void library(int b) {
             for (int i = 0; i < SPOTS.length; i++) {
                 int x = SPOTS[i][0], z = SPOTS[i][1];
                 int side = x > 0 ? 1 : -1;
+                Direction toRoom = side > 0 ? Direction.WEST : Direction.EAST;
                 switch (i % 4) {
                     case 0 -> {
-                        set(x, b + 1, z, Blocks.ENCHANTING_TABLE.defaultBlockState());
-                        set(side * I, b + 1, z, bookshelf);
-                        set(side * I, b + 2, z, bookshelf);
+                        set(x, b + 1, z, Blocks.LECTERN.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, toRoom));
+                        for (int y = b + 1; y <= b + 3; y++) set(side * I, y, z, bookshelf);
                     }
-                    case 1 -> set(x, b + 1, z, Blocks.LECTERN.defaultBlockState()
-                            .setValue(HorizontalDirectionalBlock.FACING, side > 0 ? Direction.WEST : Direction.EAST));
+                    case 1 -> { set(x, b + 1, z, slabTop()); set(x, b + 2, z, candle); }
                     case 2 -> { for (int y = b + 1; y <= b + 3; y++) set(x, y, z, bookshelf); }
-                    default -> set(x, b + 1, z, Blocks.BREWING_STAND.defaultBlockState());
+                    default -> {
+                        BlockState cb = Blocks.CHISELED_BOOKSHELF.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, toRoom);
+                        set(x, b + 1, z, cb);
+                        set(x, b + 2, z, cb);
+                        set(x, b + 3, z, candle);
+                    }
                 }
             }
         }
 
         /**
          * Floor 3 (k=2): trap floor. Each hidden pressure plate sits next to a dispenser built into the wall (a plate
-         * powers the dispenser beside it), and a carpet over the plate hides it. Mobs trigger them too.
+         * powers the dispenser beside it). Mobs trigger them too.
          */
         void trapFloor(int b) {
             for (int f = 0; f < 4; f++) for (int tt : new int[]{-4, 4}) {
@@ -477,7 +479,6 @@ public class TowerPiece extends StructurePiece {
                         + "{Slot:4b,id:'minecraft:arrow',count:64}]}";
                 setBe(pfs(f, tt, R - 1, b + 1), Blocks.DISPENSER.defaultBlockState().setValue(BlockStateProperties.FACING, inward(f)), arrows);
                 fs(f, tt, I, b + 1, Blocks.STONE_PRESSURE_PLATE.defaultBlockState());
-                fs(f, tt, I, b + 2, carpet());
             }
         }
 
@@ -495,20 +496,21 @@ public class TowerPiece extends StructurePiece {
             }
         }
 
-        /** Floor 5 (k=4): champion hall. Netherite armour stands and boss-head trophies on gold pedestals. */
+        /** Floor 5 (k=4): champion hall. Armour stands with random gear (never netherite) between lantern braziers. */
         void championHall(int b) {
             for (int i = 0; i < SPOTS.length; i++) {
                 int x = SPOTS[i][0], z = SPOTS[i][1];
                 if (i % 2 == 0) {
-                    armorStand(x, b + 1, z, "netherite", i % 4 == 0 ? "netherite_sword" : "netherite_axe");
+                    armorStand(x, b + 1, z);
                 } else {
-                    set(x, b + 1, z, Blocks.GOLD_BLOCK.defaultBlockState());
-                    set(x, b + 2, z, trophyHead());
+                    set(x, b + 1, z, t.trim);
+                    set(x, b + 2, z, t.pillar);
+                    set(x, b + 3, z, t.lanternStanding);
                 }
             }
         }
 
-        /** Banners on the pilasters, plus a painting (odd floors) or trophy item frame (even floors) below each. */
+        /** Banners on the pilasters, plus a painting (odd floors) or a candle shelf (even floors) below each. */
         void dress(int k, int b) {
             String[] art = {"kebab", "aztec", "alban", "bomb", "plant", "wasteland", "aztec2"};
             // the staircase fills the cells in front of one pilaster on the stair wall, so skip that one
@@ -520,8 +522,12 @@ public class TowerPiece extends StructurePiece {
                 setBe(pfs(f, tt, I - 1, b + 8), wallBanner(in), bannerNbt());
                 BlockPos fp = pfs(f, tt, I - 1, b + 4);
                 int ddx = fp.getX() - cx, ddz = fp.getZ() - cz;
-                if (k % 2 == 1) painting(ddx, b + 4, ddz, in, art[rnd.nextInt(art.length)]);
-                else itemFrame(ddx, b + 4, ddz, in, k == 4 ? trophyItem() : templateItem());
+                if (k % 2 == 1) {
+                    painting(ddx, b + 4, ddz, in, art[rnd.nextInt(art.length)]);
+                } else {
+                    set(ddx, b + 4, ddz, slabTop());
+                    set(ddx, b + 5, ddz, candle);
+                }
             }
         }
 
@@ -532,27 +538,6 @@ public class TowerPiece extends StructurePiece {
             fs(vf, 0, I, b + 3, t.trim);
             setBe(pfs(vf, 0, I, b + 1), Blocks.VAULT.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, inward(vf)),
                     "{config:{key_item:{id:'minecraft:trial_key',count:1},loot_table:'dimtowers:vault/floor_" + t.id + "'}}");
-        }
-
-        /** Secret closet in the north-east quadrant: a cracked-brick door, a theme-loot chest, a pot and a lantern. */
-        void closet(int b) {
-            for (int x = 8; x <= 12; x++) for (int z = -12; z <= -8; z++) {
-                boolean edge = x == 8 || x == 12 || z == -12 || z == -8;
-                for (int y = b + 1; y <= b + 3; y++) {
-                    if (edge) set(x, y, z, rnd.nextInt(7) == 0 ? Blocks.INFESTED_STONE_BRICKS.defaultBlockState() : t.wall);
-                    else clr(x, y, z);
-                }
-                set(x, b + 4, z, t.trim);
-            }
-            set(8, b + 1, -10, cracked());
-            set(8, b + 2, -10, cracked());
-            set(10, b + 1, -11, t.lanternStanding);
-            BlockPos cp = new BlockPos(cx + 11, b + 1, cz - 10);
-            if (cp.getY() <= yMax && box.isInside(cp)) {
-                level.setBlock(cp, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.WEST), 2);
-                RandomizableContainer.setBlockEntityLootTable(level, rnd, cp, treasureKey());
-            }
-            decoratedPot(9, b + 1, -11, "minecraft:diamond");
         }
 
         /** Interior pilasters between the windows on all four walls, from y0 up to y1. */
@@ -573,13 +558,39 @@ public class TowerPiece extends StructurePiece {
             }
         }
 
+        /** Runners, a patterned ring round the dais and bordered rugs under each group of props. */
+        void carpets(int b, int k) {
+            BlockState main = carpet(), alt = carpetAlt();
+            // chequered ring round the spawner dais
+            for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
+                if (Math.max(abs(dx), abs(dz)) == 4) set(dx, b + 1, dz, ((dx + dz) & 1) == 0 ? main : alt);
+            }
+            // bordered rugs in the four corners, under the prop spots
+            for (int sx = -1; sx <= 1; sx += 2) for (int sz = -1; sz <= 1; sz += 2) {
+                for (int x = 10; x <= 12; x++) for (int z = 3; z <= 8; z++) {
+                    boolean edge = x == 10 || x == 12 || z == 3 || z == 8;
+                    set(sx * x, b + 1, sz * z, edge ? alt : main);
+                }
+            }
+            // north-south runner (on the ground floor it leads in from the front door)
+            int zMax = k == 0 ? R : R - 5;
+            for (int dz = -(R - 5); dz <= zMax; dz++) {
+                if (abs(dz) <= 3) continue;
+                for (int dx = -1; dx <= 1; dx++) set(dx, b + 1, dz, dx == 0 ? main : alt);
+            }
+            // east-west runner out to the chest shrines
+            for (int dx = -(I - 1); dx <= I - 1; dx++) {
+                if (abs(dx) <= 3) continue;
+                for (int dz = -1; dz <= 1; dz++) set(dx, b + 1, dz, dz == 0 ? main : alt);
+            }
+        }
+
         void build() {
             final int sTop = s(FLOORS);
             final int top = Math.min(sTop + 22, yMax);
             final BlockState slabTop = t.slab.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.TOP);
             final BlockState slabBot = t.slab.defaultBlockState();
             final BlockState wallPiece = t.wallPiece.defaultBlockState();
-            final BlockState carpet = carpet();
 
             // 1. clear the whole volume
             for (int dx = -(R + 3); dx <= R + 3; dx++) for (int dz = -(R + 3); dz <= R + 3; dz++) {
@@ -621,7 +632,10 @@ public class TowerPiece extends StructurePiece {
             for (int dx = -(R + 2); dx <= R + 2; dx++) for (int dz = -(R + 2); dz <= R + 2; dz++) {
                 int r = Math.max(abs(dx), abs(dz));
                 if (r == R + 1) {
-                    for (int k = 1; k <= FLOORS; k++) set(dx, s(k), dz, slabTop);
+                    for (int k = 1; k <= FLOORS; k++) {
+                        set(dx, s(k), dz, slabTop);
+                        set(dx, s(k) - 1, dz, stairBlock(towardWall(dx, dz), true)); // corbel under each cornice
+                    }
                     if (!(dz == R + 1 && abs(dx) <= 4)) set(dx, s0 + 1, dz, slabBot);
                 } else if (r == R + 2) {
                     if (!(dz == R + 2 && abs(dx) <= 4)) set(dx, s0 + 1, dz, slabBot);
@@ -632,6 +646,12 @@ public class TowerPiece extends StructurePiece {
             for (int f = 0; f < 4; f++) for (int tt : PILASTER) {
                 for (int y = s0 + 1; y <= sTop + 5; y++) fs(f, tt, R + 1, y, t.pillar);
                 fs(f, tt, R + 1, sTop + 6, wallPiece);
+            }
+
+            // 6b. banners hung on the outer pilasters (ground, third and top floors)
+            for (int k = 0; k < FLOORS; k += 2) for (int f = 0; f < 4; f++) for (int tt : PILASTER) {
+                if (k == 0 && f == 0 && abs(tt) == 3) continue; // entrance pillars
+                setBe(pfs(f, tt, R + 2, s(k) + 6), wallBanner(inward(f).getOpposite()), bannerNbt());
             }
 
             // 7. corner turrets with tall lantern spires
@@ -676,6 +696,26 @@ public class TowerPiece extends StructurePiece {
             }
             set(-3, s0 + 10, R + 1, t.light); set(3, s0 + 10, R + 1, t.light);
 
+            // 9b. paved forecourt in front of the door, with lantern braziers at its corners
+            for (int dx = -4; dx <= 4; dx++) for (int dz = R + 1; dz <= R + 4; dz++) {
+                if (!colInside(dx, dz)) continue;
+                for (int i = 0; i <= 8; i++) {
+                    int y = s0 - i;
+                    if (y < level.getMinBuildHeight()) break;
+                    if (i > 0) {
+                        BlockState st = at(dx, y, dz);
+                        if (!(st.isAir() || !st.getFluidState().isEmpty() || st.canBeReplaced())) break;
+                    }
+                    set(dx, y, dz, i > 0 ? t.plinth : (abs(dx) + dz) % 2 == 0 ? t.floor : t.floorAlt);
+                }
+                if (dz > R + 2) for (int y = s0 + 1; y <= s0 + 7; y++) clr(dx, y, dz);
+            }
+            for (int sx = -4; sx <= 4; sx += 8) {
+                set(sx, s0 + 1, R + 4, t.trim);
+                set(sx, s0 + 2, R + 4, t.pillar);
+                set(sx, s0 + 3, R + 4, t.lanternStanding);
+            }
+
             // 10. interior floors
             for (int k = 0; k < FLOORS; k++) {
                 int b = s(k);
@@ -695,6 +735,12 @@ public class TowerPiece extends StructurePiece {
                     for (int y = b + 2; y <= b + H - 2; y++) set(sx, y, sz, t.pillar);
                     set(sx, b + H - 1, sz, t.trim);
                     set(sx, b + H, sz, t.light);
+                    // stair-block plinth at the foot and capital under the beams
+                    for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                        Direction toPillar = dirOf(-d[0], -d[1]);
+                        set(sx + d[0], b + 1, sz + d[1], stairBlock(toPillar, false));
+                        set(sx + d[0], b + H - 2, sz + d[1], stairBlock(toPillar, true));
+                    }
                 }
 
                 // chandeliers on the beam crossings, plus a big one over the spawner
@@ -704,15 +750,14 @@ public class TowerPiece extends StructurePiece {
                     set(c[0], b + H - 3, c[1], chain);
                     set(c[0], b + H - 4, c[1], t.lanternHanging);
                 }
+                for (int[] c : new int[][]{{3, 0}, {-3, 0}, {0, 3}, {0, -3}}) {
+                    set(c[0], b + H - 2, c[1], chain);
+                    set(c[0], b + H - 3, c[1], t.lanternHanging);
+                }
                 for (int y = b + H - 2; y >= b + H - 5; y--) set(0, y, 0, chain);
                 set(0, b + H - 6, 0, t.lanternHanging);
 
-                // carpet runner (leads in from the front door on the ground floor)
-                int zMax = k == 0 ? R : R - 5;
-                for (int dz = -(R - 5); dz <= zMax; dz++) {
-                    if (abs(dz) <= 3) continue;
-                    for (int dx = -1; dx <= 1; dx++) set(dx, b + 1, dz, carpet);
-                }
+                carpets(b, k);
 
                 // spawner dais: layered floor medallion, slab collar and four lantern posts
                 for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
@@ -725,13 +770,23 @@ public class TowerPiece extends StructurePiece {
                     set(sx, b + 2, sz, t.pillar);
                     set(sx, b + 3, sz, t.lanternStanding);
                 }
-                if (k == 0) monsterSpawner(0, b + 1, 0, 0);
-                else trialFloorSpawner(0, b + 1, 0, k);
+                trialFloorSpawner(0, b + 1, 0, k);
 
                 // lantern posts flanking the runner
                 for (int sx = -3; sx <= 3; sx += 6) for (int sz = -6; sz <= 6; sz += 12) {
                     set(sx, b + 1, sz, t.trim);
                     set(sx, b + 2, sz, t.lanternStanding);
+                }
+
+                // skirting course and ceiling cornice of stair blocks all round the room
+                for (int f = 0; f < 4; f++) {
+                    Direction outward = inward(f).getOpposite();
+                    for (int tt = -I; tt <= I; tt++) {
+                        fs(f, tt, I, b + H - 1, stairBlock(outward, true));
+                        if (has(WIN, tt) || has(PILASTER, tt)) continue;
+                        if (k == 0 && f == 0 && abs(tt) <= 2) continue; // front door
+                        fs(f, tt, I, b + 1, stairBlock(outward, false));
+                    }
                 }
 
                 // wall pilasters, corner braziers
@@ -741,22 +796,29 @@ public class TowerPiece extends StructurePiece {
                 // library nooks and barrels under each window, topped with candles
                 for (int f = 0; f < 4; f++) for (int tt : WIN) {
                     if (k == 0 && f == 0 && tt == 0) continue;  // front door
-                    if (f >= 2 && tt == 0) continue;            // the double chests sit on the east/west centre bays
+                    if (f >= 2 && tt == 0) continue;            // the chest shrines sit on the east/west centre bays
                     if (k >= 1 && tt == 0 && f == vf) continue; // this floor's vault goes here
-                    BlockState base = rnd.nextInt(4) == 0 ? barrel : bookshelf;
-                    if (k == 2 && rnd.nextInt(5) == 0) base = Blocks.INFESTED_STONE_BRICKS.defaultBlockState(); // silverfish
-                    fs(f, tt, I, b + 1, base);
-                    fs(f, tt, I, b + 2, base);
+                    if (k == 2 && rnd.nextInt(5) == 0) {
+                        fs(f, tt, I, b + 1, Blocks.INFESTED_STONE_BRICKS.defaultBlockState()); // silverfish
+                        fs(f, tt, I, b + 2, Blocks.INFESTED_STONE_BRICKS.defaultBlockState());
+                    } else if (rnd.nextInt(3) == 0) {
+                        barrelAt(f, tt, b + 1);
+                        barrelAt(f, tt, b + 2);
+                    } else {
+                        fs(f, tt, I, b + 1, bookshelf);
+                        fs(f, tt, I, b + 2, bookshelf);
+                    }
                     fs(f, tt, I, b + 3, candle);
                 }
 
-                // two-wide switchback staircase up to the next floor, with a baluster rail
+                // two-wide switchback staircase: solid-backed steps, a stair-block stringer, a balustrade with a
+                // slab handrail and a lantern every few posts, and a newel post at the foot
                 boolean even = k % 2 == 0;
                 int zRow = even ? -(R - 3) : (R - 3), zIn = even ? -(R - 4) : (R - 4);
                 int zRail = even ? zIn + 1 : zIn - 1;
                 Direction dir = even ? Direction.EAST : Direction.WEST;
                 int startX = even ? -(H - 1) : (H - 1), step = even ? 1 : -1;
-                BlockState stair = t.stairs.defaultBlockState().setValue(StairBlock.FACING, dir);
+                BlockState stair = stairBlock(dir, false);
                 for (int i = 0; i < H; i++) {
                     int x = startX + step * i;
                     int y = b + 1 + i;
@@ -765,12 +827,23 @@ public class TowerPiece extends StructurePiece {
                         set(x, y, z, stair);
                         if (i < H - 1) clr(x, b + H, z);
                     }
-                    if (i < H - 1) set(x, y, zRail, wallPiece);
+                    for (int yy = b + 1; yy < y; yy++) set(x, yy, zRail, t.trim);
+                    set(x, y, zRail, stair);
+                    if (i < H - 1) {
+                        set(x, y + 1, zRail, wallPiece);
+                        set(x, y + 2, zRail, i % 4 == 2 ? t.lanternStanding : slabBot);
+                    }
                 }
+                int footX = startX - step;
+                set(footX, b + 1, zRail, t.trim);
+                set(footX, b + 2, zRail, t.pillar);
+                set(footX, b + 3, zRail, t.lanternStanding);
+                set(footX, b + 1, zRow, carpetAlt());
+                set(footX, b + 1, zIn, carpetAlt());
 
                 // chests: the treasury (k=3) holds the theme's own loot, other floors roll vanilla tables
-                doubleChest(I, b + 1, 0, Direction.WEST, k == 3 ? treasureKey() : loot());
-                doubleChest(-I, b + 1, 0, Direction.EAST, k == 3 ? treasureKey() : loot());
+                chestShrine(2, b, k == 3 ? treasureKey() : loot());
+                chestShrine(3, b, k == 3 ? treasureKey() : loot());
 
                 // floor identity, dressing, vault and secrets
                 switch (k) {
@@ -782,7 +855,6 @@ public class TowerPiece extends StructurePiece {
                 }
                 dress(k, b);
                 if (k >= 1) floorVault(k, b, vf);
-                if (k == 1 || k == 3) closet(b);
             }
 
             // 11. boss arena (open to the sky)
