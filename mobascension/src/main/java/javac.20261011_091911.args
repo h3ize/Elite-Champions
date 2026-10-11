@@ -1,0 +1,15 @@
+-proc:none
+-d
+/tmp/cls
+./com/mobascension/ChampionLoot.java
+./com/mobascension/ChampionEvents.java
+./com/mobascension/GearEnchanter.java
+./com/mobascension/MobAscensionClient.java
+./com/mobascension/ChampionData.java
+./com/mobascension/ChampionFactory.java
+./com/mobascension/Rank.java
+./com/mobascension/AscensionCommand.java
+./com/mobascension/Ability.java
+./com/mobascension/MobAscension.java
+./com/mobascension/AscensionConfig.java
+./com/mobascension/AbilityLogic.java
