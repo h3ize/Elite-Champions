@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "elitechampions:item/champion_essence_uncommon"
+  }
+}
