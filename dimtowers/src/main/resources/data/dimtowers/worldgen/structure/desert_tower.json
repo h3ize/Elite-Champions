@@ -1,0 +1,10 @@
+{
+  "type": "dimtowers:tower",
+  "biomes": [
+    "minecraft:desert"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "theme": "desert"
+}

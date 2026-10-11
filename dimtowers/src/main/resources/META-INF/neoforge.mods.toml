@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+[[mods]]
+modId="dimtowers"
+version="1.0.0"
+displayName="Dimensional Towers"
+authors="AJ"
+description='''Dimensional Towers adds huge, themed boss towers to the world. Climb five floors of spawners, loot and decorated halls, then face a boss at the top and claim the vault.
+
+Nineteen towers: Overworld, Nether, End, plus biome variants (frozen, desert, oak, dark forest, jungle, swamp, taiga, badlands, pillager, ocean, deep dark, cherry, savanna), and piglin, crimson and warped towers in the Nether. Ten bosses, themed minion waves, clearable trial-spawner floors with vaults, traps and secret rooms.'''
+[[dependencies.dimtowers]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.0,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.dimtowers]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"

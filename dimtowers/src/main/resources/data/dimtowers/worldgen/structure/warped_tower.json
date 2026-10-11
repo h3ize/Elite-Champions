@@ -1,0 +1,10 @@
+{
+  "type": "dimtowers:tower",
+  "biomes": [
+    "minecraft:warped_forest"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "theme": "warped"
+}

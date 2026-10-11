@@ -1,0 +1,11 @@
+{
+  "type": "dimtowers:tower",
+  "biomes": [
+    "minecraft:beach",
+    "minecraft:stony_shore"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "theme": "ocean"
+}

@@ -1,0 +1,11 @@
+{
+  "type": "dimtowers:tower",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:flower_forest"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "theme": "oak"
+}

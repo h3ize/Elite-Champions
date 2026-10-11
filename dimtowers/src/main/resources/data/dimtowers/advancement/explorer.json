@@ -1,0 +1,329 @@
+{
+  "parent": "dimtowers:enter_tower",
+  "display": {
+    "icon": {
+      "id": "minecraft:map"
+    },
+    "title": {
+      "translate": "advancement.dimtowers.explorer.title"
+    },
+    "description": {
+      "translate": "advancement.dimtowers.explorer.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "overworld": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:overworld_tower"
+            }
+          }
+        ]
+      }
+    },
+    "nether": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:nether_tower"
+            }
+          }
+        ]
+      }
+    },
+    "end": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:end_tower"
+            }
+          }
+        ]
+      }
+    },
+    "piglin": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:piglin_tower"
+            }
+          }
+        ]
+      }
+    },
+    "frozen": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:frozen_tower"
+            }
+          }
+        ]
+      }
+    },
+    "desert": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:desert_tower"
+            }
+          }
+        ]
+      }
+    },
+    "oak": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:oak_tower"
+            }
+          }
+        ]
+      }
+    },
+    "pillager": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:pillager_tower"
+            }
+          }
+        ]
+      }
+    },
+    "dark_forest": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:dark_forest_tower"
+            }
+          }
+        ]
+      }
+    },
+    "jungle": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:jungle_tower"
+            }
+          }
+        ]
+      }
+    },
+    "swamp": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:swamp_tower"
+            }
+          }
+        ]
+      }
+    },
+    "taiga": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:taiga_tower"
+            }
+          }
+        ]
+      }
+    },
+    "badlands": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:badlands_tower"
+            }
+          }
+        ]
+      }
+    },
+    "ocean": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:ocean_tower"
+            }
+          }
+        ]
+      }
+    },
+    "deep_dark": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:deep_dark_tower"
+            }
+          }
+        ]
+      }
+    },
+    "cherry": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:cherry_tower"
+            }
+          }
+        ]
+      }
+    },
+    "savanna": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:savanna_tower"
+            }
+          }
+        ]
+      }
+    },
+    "crimson": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:crimson_tower"
+            }
+          }
+        ]
+      }
+    },
+    "warped": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "structures": "dimtowers:warped_tower"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "overworld"
+    ],
+    [
+      "nether"
+    ],
+    [
+      "end"
+    ],
+    [
+      "piglin"
+    ],
+    [
+      "frozen"
+    ],
+    [
+      "desert"
+    ],
+    [
+      "oak"
+    ],
+    [
+      "pillager"
+    ],
+    [
+      "dark_forest"
+    ],
+    [
+      "jungle"
+    ],
+    [
+      "swamp"
+    ],
+    [
+      "taiga"
+    ],
+    [
+      "badlands"
+    ],
+    [
+      "ocean"
+    ],
+    [
+      "deep_dark"
+    ],
+    [
+      "cherry"
+    ],
+    [
+      "savanna"
+    ],
+    [
+      "crimson"
+    ],
+    [
+      "warped"
+    ]
+  ],
+  "rewards": {
+    "experience": 500
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "dimtowers:tower",
+  "biomes": [
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "theme": "swamp"
+}

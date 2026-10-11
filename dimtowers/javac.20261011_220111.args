@@ -1,0 +1,14 @@
+-proc:none
+-Xmaxerrs
+5000
+-d
+/tmp/out
+src/main/java/com/example/dimtowers/DimensionalTowers.java
+src/main/java/com/example/dimtowers/TowerBosses.java
+src/main/java/com/example/dimtowers/ClientSetup.java
+src/main/java/com/example/dimtowers/TowerPiglinRenderer.java
+src/main/java/com/example/dimtowers/TowerBoss.java
+src/main/java/com/example/dimtowers/TowerPiece.java
+src/main/java/com/example/dimtowers/Theme.java
+src/main/java/com/example/dimtowers/TowerStructure.java
+src/main/java/com/example/dimtowers/BossKit.java

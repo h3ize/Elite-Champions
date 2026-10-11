@@ -1,0 +1,23 @@
+{
+  "values": [
+    "dimtowers:overworld_tower",
+    "dimtowers:nether_tower",
+    "dimtowers:end_tower",
+    "dimtowers:piglin_tower",
+    "dimtowers:frozen_tower",
+    "dimtowers:desert_tower",
+    "dimtowers:oak_tower",
+    "dimtowers:pillager_tower",
+    "dimtowers:dark_forest_tower",
+    "dimtowers:jungle_tower",
+    "dimtowers:swamp_tower",
+    "dimtowers:taiga_tower",
+    "dimtowers:badlands_tower",
+    "dimtowers:ocean_tower",
+    "dimtowers:deep_dark_tower",
+    "dimtowers:cherry_tower",
+    "dimtowers:savanna_tower",
+    "dimtowers:crimson_tower",
+    "dimtowers:warped_tower"
+  ]
+}

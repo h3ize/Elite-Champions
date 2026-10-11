@@ -1,0 +1,174 @@
+{
+  "parent": "dimtowers:enter_tower",
+  "display": {
+    "icon": {
+      "id": "minecraft:netherite_sword"
+    },
+    "title": {
+      "translate": "advancement.dimtowers.slay_boss.title"
+    },
+    "description": {
+      "translate": "advancement.dimtowers.slay_boss.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tower_boss": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_boss"
+            }
+          }
+        ]
+      }
+    },
+    "tower_zombie": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_zombie"
+            }
+          }
+        ]
+      }
+    },
+    "tower_skeleton": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_skeleton"
+            }
+          }
+        ]
+      }
+    },
+    "tower_piglin": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_piglin"
+            }
+          }
+        ]
+      }
+    },
+    "tower_vindicator": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_vindicator"
+            }
+          }
+        ]
+      }
+    },
+    "tower_blaze": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_blaze"
+            }
+          }
+        ]
+      }
+    },
+    "tower_spider": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_spider"
+            }
+          }
+        ]
+      }
+    },
+    "tower_ender": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_ender"
+            }
+          }
+        ]
+      }
+    },
+    "tower_slime": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_slime"
+            }
+          }
+        ]
+      }
+    },
+    "tower_drowned": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "dimtowers:tower_drowned"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "tower_boss",
+      "tower_zombie",
+      "tower_skeleton",
+      "tower_piglin",
+      "tower_vindicator",
+      "tower_blaze",
+      "tower_spider",
+      "tower_ender",
+      "tower_slime",
+      "tower_drowned"
+    ]
+  ]
+}
