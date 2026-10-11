@@ -15,7 +15,7 @@
   "entity.dimtowers.tower_ender": "Void Stalker",
   "entity.dimtowers.tower_slime": "Slime King",
   "entity.dimtowers.tower_drowned": "Tidal Tyrant",
-  "message.dimtowers.wave": "%s calls for reinforcements!",
+  "message.dimtowers.wave": "%s has summoned minions!",
   "message.dimtowers.enrage": "%s is enraged!",
   "advancement.dimtowers.explorer.title": "Tower Cartographer",
   "advancement.dimtowers.explorer.description": "Visit every kind of tower",

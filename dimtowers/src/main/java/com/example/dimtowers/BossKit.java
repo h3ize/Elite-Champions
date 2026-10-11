@@ -2,6 +2,7 @@ package com.example.dimtowers;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -44,6 +45,7 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 /**
  * Shared boss logic: gear, phases, theme-aware minion waves and the per-boss signature moves.
@@ -228,6 +230,24 @@ public final class BossKit {
     public static int countMinions(ServerLevel sl, Mob boss) {
         return sl.getEntitiesOfClass(Mob.class, boss.getBoundingBox().inflate(40),
                 m -> m.getTags().contains("dt_minion") && m.isAlive()).size();
+    }
+
+    /** True for any of this mod's boss entity types (minions are tagged dt_minion and never count as bosses). */
+    private static boolean isTowerBoss(LivingEntity e) {
+        return BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getNamespace().equals(DimensionalTowers.MOD_ID)
+                && !e.getTags().contains("dt_minion");
+    }
+
+    /** When a tower boss dies, everything it summoned vanishes with it. */
+    public static void onLivingDeath(LivingDeathEvent event) {
+        LivingEntity dead = event.getEntity();
+        if (!(dead.level() instanceof ServerLevel sl) || !isTowerBoss(dead)) return;
+        List<Mob> minions = sl.getEntitiesOfClass(Mob.class, dead.getBoundingBox().inflate(64),
+                m -> m.getTags().contains("dt_minion") && m.isAlive());
+        for (Mob m : minions) {
+            sl.sendParticles(ParticleTypes.POOF, m.getX(), m.getY() + m.getBbHeight() / 2, m.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+            m.discard();
+        }
     }
 
     private interface Proj { @Nullable Entity make(Level level, Mob boss, Vec3 dir, int index); }

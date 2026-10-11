@@ -7,6 +7,7 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -65,6 +66,7 @@ public class DimensionalTowers {
         PIECE_TYPES.register(modBus);
         ENTITIES.register(modBus);
         modBus.addListener(this::attributes);
+        NeoForge.EVENT_BUS.addListener(BossKit::onLivingDeath);
     }
 
     private void attributes(EntityAttributeCreationEvent e) {

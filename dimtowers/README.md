@@ -48,16 +48,19 @@ from a `dt_theme_<id>` tag in the boss spawner's spawn data. Because that makes 
 ## Floors
 | Floor | Identity | Spawner |
 |---|---|---|
-| 1 | Armory: trimmed armour stands, anvils, grindstones, smithing tables | classic spawner, weak half of the mob list |
-| 2 | Library: enchanting tables, lecterns, bookshelves, secret closet | Trial Spawner, 8 mobs |
-| 3 | Trap floor: hidden pressure plates under carpets firing wall dispensers (poison/slowness arrows), infested bricks | Trial Spawner, 10 mobs |
-| 4 | Treasury: decorated pots, theme-loot chests, secret closet | Trial Spawner, 12 mobs, strong half of the list |
-| 5 | Champion hall: netherite armour stands, boss-head trophies | Trial Spawner, 6 champions (top two mobs, 80 HP, strength II) |
+| 1 | Armory: armour stands with random mixed gear and a random tool (never netherite), anvils, grindstones, smithing tables | Trial Spawner, 6 mobs, one mob type |
+| 2 | Library: lecterns, desks, bookshelf stacks, chiseled shelves | Trial Spawner, 8 mobs, one mob type |
+| 3 | Trap floor: pressure plates firing wall dispensers (poison/slowness arrows), infested bricks | Trial Spawner, 10 mobs, one mob type |
+| 4 | Treasury: decorated pots, theme-loot chests | Trial Spawner, 12 mobs, one mob type |
+| 5 | Champion hall: armour stands (random mixed gear, never netherite), lantern braziers | Trial Spawner, 6 champions (80 HP, strength II) |
 
+Each floor's Trial Spawner spawns a single mob type picked per tower; the cooldown is 2 seconds (`SPAWNER_COOLDOWN`).
 Mobs wear armour that scales with height (chainmail, iron, diamond, netherite) and get potion effects on upper floors.
 Clearing a Trial Spawner ejects a trial key that opens the vault on that floor. Floors 2-5 each have a vault.
-Secret closets (floors 2 and 4) sit behind a cracked-brick door in the north-east quadrant.
-Dressing: wall banners with theme patterns, paintings, trophy item frames, bells on the spires.
+Chests are single chests in pillared shrines. Barrels in the wall nooks use `chests/barrel` (early-game supplies,
+trial-chamber barrel items, and a 1% pool for diamonds / a diamond pickaxe / an enchanted diamond axe).
+When a tower boss dies, every minion it summoned (tag `dt_minion`) within 64 blocks vanishes.
+Dressing: wall banners with theme patterns, paintings, candle shelves, carpet runners and rugs, bells on the spires.
 
 ## Loot
 - Boss vault (ominous key): the original table plus a guaranteed trim template and a named, enchanted weapon and chestplate per theme.

@@ -477,19 +477,10 @@ class TowerSlime extends Slime {
         return r;
     }
 
-    /** On death vanilla would split into more copies of THIS entity type (more bosses); do our own split instead. */
+    /** On death vanilla would split into more copies of THIS entity type (more bosses); make it split into nothing instead. */
     @Override
     public void remove(Entity.RemovalReason reason) {
-        if (this.level() instanceof ServerLevel sl && this.isDeadOrDying() && this.getSize() > 1) {
-            for (int i = 0; i < 5; i++) {
-                Slime s = EntityType.SLIME.create(sl);
-                if (s == null) continue;
-                s.moveTo(this.getX() + (this.random.nextDouble() - 0.5) * 5, this.getY(), this.getZ() + (this.random.nextDouble() - 0.5) * 5,
-                        this.random.nextFloat() * 360f, 0f);
-                s.setSize(2, true);
-                s.addTag("dt_minion");
-                sl.addFreshEntity(s);
-            }
+        if (this.isDeadOrDying() && this.getSize() > 1) {
             super.setSize(1, false); // bypass the override so vanilla's own split sees size 1 and does nothing
         }
         super.remove(reason);
