@@ -5,6 +5,7 @@ import com.elitechampions.config.ChampionConfig;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
@@ -67,7 +68,9 @@ public final class ChampionEvents {
             }
         }
         if (abilities.contains(ChampionAbility.SKELETON_PIERCING)) {
-            arrow.setPierceLevel((byte) (int) ChampionConfig.PIERCING_LEVEL.get());
+            CompoundTag arrowTag = arrow.saveWithoutId(new CompoundTag());
+            arrowTag.putByte("PierceLevel", (byte) (int) ChampionConfig.PIERCING_LEVEL.get());
+            arrow.load(arrowTag);
         }
         if (abilities.contains(ChampionAbility.SKELETON_FLAME_ARCHER)) {
             arrow.setRemainingFireTicks(100);
