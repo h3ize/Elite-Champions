@@ -741,12 +741,7 @@ public class TowerPiece extends StructurePiece {
                 // library nooks and barrels under each window, topped with candles
                 for (int f = 0; f < 4; f++) for (int tt : WIN) {
                     if (k == 0 && f == 0 && tt == 0) continue;  // front door
-                    if (f >= 2 && tt == 0) continue;            // banners on the arena pilasters
-            for (int f = 0; f < 4; f++) for (int tt : new int[]{-3, 3}) {
-                setBe(pfs(f, tt, I - 1, sTop + 3), wallBanner(inward(f)), bannerNbt());
-            }
-
-            // treasure chests
+                    if (f >= 2 && tt == 0) continue;            // the double chests sit on the east/west centre bays
                     if (k >= 1 && tt == 0 && f == vf) continue; // this floor's vault goes here
                     BlockState base = rnd.nextInt(4) == 0 ? barrel : bookshelf;
                     if (k == 2 && rnd.nextInt(5) == 0) base = Blocks.INFESTED_STONE_BRICKS.defaultBlockState(); // silverfish
@@ -808,6 +803,11 @@ public class TowerPiece extends StructurePiece {
             for (int f = 0; f < 4; f++) for (int tt : WIN) fs(f, tt, R - 1, sTop + 3, t.light);
             interiorPilasters(sTop + 1, sTop + 4);
             cornerPosts(sTop);
+
+            // banners on the arena pilasters
+            for (int f = 0; f < 4; f++) for (int tt : new int[]{-3, 3}) {
+                setBe(pfs(f, tt, I - 1, sTop + 3), wallBanner(inward(f)), bannerNbt());
+            }
 
             // vault on the south side, framed
             for (int y = sTop + 1; y <= sTop + 3; y++) { set(-1, y, I, t.pillar); set(1, y, I, t.pillar); }
