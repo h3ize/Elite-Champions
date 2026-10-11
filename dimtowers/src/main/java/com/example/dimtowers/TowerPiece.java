@@ -62,6 +62,8 @@ public class TowerPiece extends StructurePiece {
     static final int[] TRIAL_SIMUL = {2, 3, 4, 5, 3};
     /** Cooldown after a trial spawner is beaten, in ticks (40 = 2 seconds). */
     static final int SPAWNER_COOLDOWN = 40;
+    /** The boss spawner stays dormant for a long time after the boss dies (1200000 ticks = ~16 hours). */
+    static final int BOSS_COOLDOWN = 1200000;
     static final String[] ARMOR_TIER = {"", "chainmail", "iron", "diamond", "netherite"};
     static final String[] TOOL_TIER = {"wooden", "stone", "iron", "diamond", "netherite"};
     /** Armour-stand gear: no netherite, ever. Duplicates make the common sets more likely. */
@@ -331,23 +333,20 @@ public class TowerPiece extends StructurePiece {
                     + ",required_player_range:14,target_cooldown_length:" + SPAWNER_COOLDOWN + "}");
         }
 
-        /** Boss Trial Spawner: one boss from the theme's pool, then it ejects the ominous trial key. */
+        /** Boss Trial Spawner: exactly one boss type for this tower (picked at generation), then it ejects the ominous trial key. */
         void bossTrialSpawner(int dx, int y, int dz) {
             BlockPos p = new BlockPos(cx + dx, y, cz + dz);
             if (y > yMax || !box.isInside(p)) return;
             level.setBlock(p, Blocks.TRIAL_SPAWNER.defaultBlockState(), 2);
-            StringBuilder pot = new StringBuilder();
-            for (String id : t.bosses) {
-                if (pot.length() > 0) pot.append(',');
-                // the theme tag is how the boss knows which tower it belongs to (minion waves, abilities)
-                pot.append("{weight:1,data:{entity:{id:'").append(id).append("',Tags:['").append(t.bossTag()).append("']}}}");
-            }
+            String id = t.bosses[rnd.nextInt(t.bosses.length)];
+            // the theme tag is how the boss knows which tower it belongs to (minion waves, abilities)
+            String pot = "{weight:1,data:{entity:{id:'" + id + "',Tags:['" + t.bossTag() + "']}}}";
             String config = "{spawn_range:5,total_mobs:1.0f,simultaneous_mobs:1.0f,"
                     + "total_mobs_added_per_player:0.0f,simultaneous_mobs_added_per_player:0.0f,ticks_between_spawn:40,"
                     + "spawn_potentials:[" + pot + "],"
                     + "loot_tables_to_eject:[{weight:1,data:'dimtowers:spawners/boss_key'}]}";
             blockEntityNbt(p, "{normal_config:" + config + ",ominous_config:" + config
-                    + ",required_player_range:12,target_cooldown_length:" + SPAWNER_COOLDOWN + "}");
+                    + ",required_player_range:12,target_cooldown_length:" + BOSS_COOLDOWN + "}");
         }
 
         // ------------------------------------------------------------------ helpers
