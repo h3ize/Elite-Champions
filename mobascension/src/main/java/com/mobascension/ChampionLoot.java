@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,7 +35,6 @@ public final class ChampionLoot {
         RegistryAccess access = level.registryAccess();
         List<ItemStack> out = new ArrayList<>();
 
-        // 1) always dropped
         for (String line : cfg.guaranteedLoot.get()) {
             Entry e = Entry.parse(line);
             if (e == null) continue;
@@ -41,7 +42,6 @@ public final class ChampionLoot {
             if (!stack.isEmpty()) out.add(stack);
         }
 
-        // 2) guaranteed weighted rolls (this is the "1-2+ items per kill" part)
         List<Entry> pool = new ArrayList<>();
         double total = 0;
         for (String line : cfg.rewardPool.get()) {
@@ -66,7 +66,6 @@ public final class ChampionLoot {
             }
         }
 
-        // 3) chance-based bonus loot
         for (String line : cfg.bonusLoot.get()) {
             Entry e = Entry.parse(line);
             if (e == null) continue;
@@ -78,13 +77,24 @@ public final class ChampionLoot {
         return out;
     }
 
-    /** Apex weapon drop alternative: a bow with Power 7 (sometimes 8), Unbreaking 3 and Mending. */
+    /** The champion's own head, rolled against the rank's headDropChance. Empty if the mob has no head item. */
+    public static ItemStack head(Mob mob, Rank rank, RandomSource random) {
+        if (random.nextDouble() >= AscensionConfig.rank(rank).headChance.get()) return ItemStack.EMPTY;
+        EntityType<?> type = mob.getType();
+        if (type == EntityType.ZOMBIE) return new ItemStack(Items.ZOMBIE_HEAD);
+        if (type == EntityType.SKELETON) return new ItemStack(Items.SKELETON_SKULL);
+        if (type == EntityType.WITHER_SKELETON) return new ItemStack(Items.WITHER_SKELETON_SKULL);
+        if (type == EntityType.CREEPER) return new ItemStack(Items.CREEPER_HEAD);
+        if (type == EntityType.PIGLIN) return new ItemStack(Items.PIGLIN_HEAD);
+        return ItemStack.EMPTY;
+    }
+
+    /** Apex weapon drop alternative: a bow with Power 5 (sometimes 6), Unbreaking 3 and Mending. */
     public static ItemStack apexBow(ServerLevel level, RandomSource random) {
         ItemStack bow = new ItemStack(Items.BOW);
         Registry<Enchantment> registry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
-        // set directly (not through the vanilla-max cap used for config lines) so Power can exceed 5
         registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.POWER)
-                .ifPresent(h -> bow.enchant(h, 7 + random.nextInt(2)));
+                .ifPresent(h -> bow.enchant(h, 5 + random.nextInt(2)));
         registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING).ifPresent(h -> bow.enchant(h, 3));
         registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.MENDING).ifPresent(h -> bow.enchant(h, 1));
         return bow;
@@ -112,7 +122,7 @@ public final class ChampionLoot {
                 ResourceLocation id = ResourceLocation.tryParse(p[0].trim());
                 if (id == null) return null;
                 Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(Items.AIR);
-                if (item == Items.AIR || item == Items.ELYTRA) return null; // elytra never drops
+                if (item == Items.AIR) return null;
                 double value = Double.parseDouble(p[1].trim());
                 int min = Integer.parseInt(p[2].trim());
                 int max = Math.max(min, Integer.parseInt(p[3].trim()));
@@ -126,7 +136,7 @@ public final class ChampionLoot {
                 }
                 return new Entry(item, value, min, max, enchants);
             } catch (NumberFormatException ex) {
-                return null; // malformed config line, skip it
+                return null;
             }
         }
 

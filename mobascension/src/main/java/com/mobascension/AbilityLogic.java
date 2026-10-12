@@ -41,31 +41,25 @@ public final class AbilityLogic {
         return (mob.tickCount + mob.getId()) % cooldown(a) == 0;
     }
 
-    // ------------------------------------------------------------------ per-tick
-
     public static void tick(Mob mob, ServerLevel level, Rank rank, EnumSet<Ability> abilities) {
         AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
 
-        // regeneration stat
         if (mob.tickCount % 20 == 0) {
             double regen = cfg.regen.get() * ChampionFactory.statScale(mob, rank);
             if (regen > 0 && mob.getHealth() < mob.getMaxHealth()) mob.heal((float) regen);
         }
 
-        // particle aura
         if (AscensionConfig.PARTICLES.get() && mob.tickCount % 10 == 0) {
             double w = mob.getBbWidth();
             level.sendParticles(rank.particle(), mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(),
                     2 + rank.ordinal(), w * 0.5, mob.getBbHeight() * 0.4, w * 0.5, 0.02);
         }
 
-        // Apex automatically locks onto the nearest player in range
         if (rank == Rank.APEX && mob.tickCount % 20 == 0) {
             int radius = AscensionConfig.APEX_AGGRO_RADIUS.get();
             if (radius > 0) aggro(mob, level, radius);
         }
 
-        // ranged attack (fireballs / wither skulls)
         if (rank == Rank.APEX && mob.getPersistentData().getBoolean(ChampionData.RANGED)
                 && (mob.tickCount + mob.getId()) % Math.max(1, cfg.rangedCooldown.get()) == 0) {
             LivingEntity t = mob.getTarget();
@@ -126,8 +120,7 @@ public final class AbilityLogic {
                 target.getX() - mob.getX(),
                 target.getY(0.5) - mob.getY(0.5),
                 target.getZ() - mob.getZ()).normalize();
-        if (rank != Rank.APEX) return; // safety: only Apex champions shoot
-        // Apex randomly fires either a wither skull or a large fireball
+        if (rank != Rank.APEX) return;
         boolean skull = mob.getRandom().nextBoolean();
         AbstractHurtingProjectile projectile = skull
                 ? new WitherSkull(level, mob, direction)
@@ -169,8 +162,6 @@ public final class AbilityLogic {
         }
     }
 
-    // ------------------------------------------------------------------ on hit (champion is attacker)
-
     public static void onAttack(Mob attacker, LivingEntity victim, float damage, EnumSet<Ability> abilities) {
         if (abilities.contains(Ability.VAMPIRIC)) {
             attacker.heal(damage * (float) power(Ability.VAMPIRIC));
@@ -185,15 +176,11 @@ public final class AbilityLogic {
         }
     }
 
-    // ------------------------------------------------------------------ on being hit (champion is victim)
-
     public static void onDefend(Mob champion, LivingEntity attacker, float damage, EnumSet<Ability> abilities) {
         if (abilities.contains(Ability.THORNED)) {
             attacker.hurt(champion.damageSources().thorns(champion), damage * (float) power(Ability.THORNED));
         }
     }
-
-    // ------------------------------------------------------------------ on death
 
     public static void onDeath(Mob mob, ServerLevel level, EnumSet<Ability> abilities) {
         if (abilities.contains(Ability.VOLATILE)) {

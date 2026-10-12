@@ -22,8 +22,8 @@ public final class AscensionConfig {
     public static final ModConfigSpec.BooleanValue GLOW_COLORS;
     public static final ModConfigSpec.BooleanValue SCALE_RANGED_DAMAGE;
     public static final ModConfigSpec.BooleanValue MINIONS_DROP_LOOT;
-    public static final ModConfigSpec.IntValue GEAR_DROP_MIN;
-    public static final ModConfigSpec.IntValue GEAR_DROP_MAX;
+    public static final ModConfigSpec.BooleanValue RANK_IN_NAME;
+    public static final ModConfigSpec.BooleanValue NAME_ALWAYS_VISIBLE;
     public static final ModConfigSpec.DoubleValue COMMON_WEIGHT;
     public static final ModConfigSpec.IntValue ANNOUNCE_RADIUS;
     public static final ModConfigSpec.IntValue APEX_AGGRO_RADIUS;
@@ -63,10 +63,6 @@ public final class AscensionConfig {
                 .define("replaceVanillaGear", true);
         REQUIRE_PLAYER_KILL = b.comment("Gear and bonus loot only drop if a player gets the kill.")
                 .define("requirePlayerKill", true);
-        GEAR_DROP_MIN = b.comment("Guaranteed number of gear pieces (weapon and/or armor) a champion drops, minimum.")
-                .defineInRange("gearDropsMin", 1, 0, 5);
-        GEAR_DROP_MAX = b.comment("Guaranteed number of gear pieces a champion drops, maximum.")
-                .defineInRange("gearDropsMax", 2, 0, 5);
         PARTICLES = b.comment("Rank-coloured particle aura around champions.").define("particles", true);
         GLOW_COLORS = b.comment("Put champions on a coloured scoreboard team so the Glowing outline matches their rank.")
                 .define("coloredGlowOutline", true);
@@ -74,6 +70,11 @@ public final class AscensionConfig {
                 .define("scaleRangedDamage", true);
         MINIONS_DROP_LOOT = b.comment("Whether minions from the Splitting ability drop loot/xp.")
                 .define("minionsDropLoot", false);
+        RANK_IN_NAME = b.comment("Put the champion's rank in its name, e.g. \"Veteran Zombie\".")
+                .define("rankInName", true);
+        NAME_ALWAYS_VISIBLE = b.comment("Show the rank name above champions all the time (visible through walls).",
+                "If false, the name only shows while you look directly at the mob.")
+                .define("nameAlwaysVisible", true);
         ANNOUNCE_RADIUS = b.comment("Radius (blocks) in which players are told about announced champions.")
                 .defineInRange("announceRadius", 96, 8, 1024);
         APEX_AGGRO_RADIUS = b.comment("Apex champions automatically target the nearest player within this many blocks (0 = off).")
@@ -100,8 +101,6 @@ public final class AscensionConfig {
     public static RankSettings rank(Rank r) { return RANKS.get(r); }
 
     public static AbilitySettings ability(Ability a) { return ABILITIES.get(a); }
-
-    // ---------------------------------------------------------------------------------------------
 
     public static final class AbilitySettings {
         public final ModConfigSpec.BooleanValue enabled;
@@ -137,8 +136,8 @@ public final class AscensionConfig {
         public final ModConfigSpec.IntValue glowSeconds;
         public final ModConfigSpec.BooleanValue announce, fireworks;
 
-        public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance;
-        public final ModConfigSpec.IntValue enchantCount, maxEnchantLevel, killLevels, killLevelsMax, rangedCooldown,
+        public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance, headChance;
+        public final ModConfigSpec.IntValue maxNetheritePieces, enchantCount, maxEnchantLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
                 rewardRollsMin, rewardRollsMax;
         public final EnumMap<EquipmentSlot, ModConfigSpec.ConfigValue<List<? extends String>>> gear =
                 new EnumMap<>(EquipmentSlot.class);
@@ -179,7 +178,7 @@ public final class AscensionConfig {
             size = b.comment("Extra body size as a fraction at level 5 (0.2 = 20% bigger).")
                     .defineInRange("sizeBonus", new double[]{0.0, 0.05, 0.10, 0.20}[i], 0.0, 2.0);
             xp = b.comment("Experience drop multiplier.")
-                    .defineInRange("xpMultiplier", new double[]{0.5, 0.6, 0.75, 1.0}[i], 0.0, 1000.0);
+                    .defineInRange("xpMultiplier", new double[]{0.35, 0.4, 0.5, 0.6}[i], 0.0, 1000.0);
             b.pop();
 
             b.push("effects");
@@ -208,14 +207,22 @@ public final class AscensionConfig {
             gear.put(EquipmentSlot.LEGS, list(b, "leggings", GEAR_LEGS[i]));
             gear.put(EquipmentSlot.FEET, list(b, "boots", GEAR_FEET[i]));
             gear.put(EquipmentSlot.MAINHAND, list(b, "weapons", GEAR_WEAPON[i]));
+            maxNetheritePieces = b.comment("Most netherite armor pieces a champion of this rank wears. Extra netherite pieces become diamond.")
+                    .defineInRange("maxNetheritePieces", new int[]{4, 4, 4, 2}[i], 0, 4);
             trim = b.comment("Chance per armor piece to have a random VANILLA armor trim.")
                     .defineInRange("armorTrimChance", new double[]{0.10, 0.25, 0.50, 0.80}[i], 0.0, 1.0);
             enchantChance = b.comment("Chance per gear piece to be enchanted (plain vanilla enchantments).")
                     .defineInRange("enchantChance", new double[]{0.3, 0.5, 0.75, 1.0}[i], 0.0, 1.0);
             enchantCount = b.comment("How many enchantments an enchanted piece gets.")
                     .defineInRange("enchantCount", new int[]{1, 2, 3, 4}[i], 0, 8);
-            maxEnchantLevel = b.comment("Highest level per enchantment (also never above the vanilla max for that enchantment).")
-                    .defineInRange("maxEnchantLevel", new int[]{2, 3, 4, 5}[i], 1, 5);
+            maxEnchantLevel = b.comment("Highest enchantment level on ARMOR (also never above the vanilla max for that enchantment).")
+                    .defineInRange("maxEnchantLevel", new int[]{1, 2, 2, 3}[i], 1, 5);
+            weaponEnchantLevel = b.comment("Highest enchantment level on WEAPONS (also never above the vanilla max for that enchantment).")
+                    .defineInRange("weaponEnchantLevel", new int[]{1, 2, 3, 5}[i], 1, 5);
+            gearDropsMin = b.comment("Gear pieces dropped on a player kill, minimum. A drop is never two weapons: it is armor and/or one weapon.")
+                    .defineInRange("gearDropsMin", new int[]{1, 1, 1, 1}[i], 0, 5);
+            gearDropsMax = b.comment("Gear pieces dropped on a player kill, maximum.")
+                    .defineInRange("gearDropsMax", new int[]{1, 1, 2, 2}[i], 0, 5);
             b.pop();
 
             b.push("ranged");
@@ -227,15 +234,17 @@ public final class AscensionConfig {
             b.pop();
 
             killLevels = b.comment("Minimum experience LEVELS given directly to the player who kills this rank.")
-                    .defineInRange("killLevels", new int[]{1, 8, 13, 18}[i], 0, 1000);
+                    .defineInRange("killLevels", new int[]{1, 2, 5, 15}[i], 0, 1000);
             killLevelsMax = b.comment("Maximum experience LEVELS given to the killer (a random amount between min and max).")
-                    .defineInRange("killLevelsMax", new int[]{4, 13, 18, 26}[i], 0, 1000);
+                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 20}[i], 0, 1000);
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{0, 0, 1, 1}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 0}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 1}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 0}[i], 0, 64);
+            headChance = b.comment("Chance to drop the champion's own head (only zombie, skeleton, wither skeleton, creeper and piglin have one).")
+                    .defineInRange("headDropChance", new double[]{0.0, 0.01, 0.02, 0.05}[i], 0.0, 1.0);
             rewardPool = b.comment("Weighted pool the guaranteed rolls pick from.",
                     "Format: item_id|weight|min|max  or  item_id|weight|min|max|enchant=level,enchant=level",
                     "Example: minecraft:shield|5|1|1|unbreaking=3,mending=1  (levels are capped at the vanilla max)")
@@ -285,36 +294,29 @@ public final class AscensionConfig {
                 {"minecraft:diamond_sword", "minecraft:diamond_axe"},
                 {"minecraft:netherite_sword", "minecraft:netherite_axe"}};
         private static final String[][] GUARANTEED_LOOT = {
-                // Veteran
-                {"minecraft:experience_bottle|1.0|1|1"},
-                // Elite
                 {"minecraft:experience_bottle|1.0|1|2"},
-                // Mythic
-                {"minecraft:experience_bottle|1.0|1|3",
+                {"minecraft:experience_bottle|1.0|2|3",
                         "minecraft:diamond|1.0|1|1"},
-                // Apex
                 {"minecraft:experience_bottle|1.0|2|4",
-                        "minecraft:netherite_ingot|1.0|1|2",
-                        "minecraft:enchanted_golden_apple|1.0|1|1"}};
+                        "minecraft:diamond|1.0|2|3",
+                        "minecraft:golden_apple|1.0|1|1"},
+                {"minecraft:diamond|1.0|2|6",
+                        "minecraft:netherite_ingot|1.0|2|2",
+                        "minecraft:enchanted_golden_apple|1.0|1|1",
+                        "minecraft:experience_bottle|1.0|2|6"}};
         private static final String[][] REWARD_POOL = {
-                // Veteran
-                {"minecraft:iron_ingot|12|1|3", "minecraft:gold_ingot|8|1|2", "minecraft:emerald|6|1|2",
-                        "minecraft:diamond|1|1|1", "minecraft:cooked_beef|10|3|6", "minecraft:golden_apple|1|1|1",
+                {"minecraft:iron_ingot|12|1|2", "minecraft:gold_ingot|8|1|1", "minecraft:emerald|6|1|1",
+                        "minecraft:cooked_beef|10|2|4",
                         "minecraft:shield|2|1|1|unbreaking=1", "minecraft:enchanted_book|1|1|1|unbreaking=1"},
-                // Elite
-                {"minecraft:diamond|5|1|1", "minecraft:emerald|8|1|3", "minecraft:golden_apple|4|1|1",
-                        "minecraft:ender_pearl|5|1|1", "minecraft:iron_block|3|1|1",
-                        "minecraft:experience_bottle|6|2|4",
+                {"minecraft:diamond|3|1|1", "minecraft:emerald|8|1|2", "minecraft:golden_apple|3|1|1",
+                        "minecraft:ender_pearl|5|1|1",
+                        "minecraft:experience_bottle|6|1|2",
                         "minecraft:shield|3|1|1|unbreaking=2",
-                        "minecraft:diamond_sword|1|1|1|sharpness=1,unbreaking=1",
                         "minecraft:enchanted_book|1|1|1|unbreaking=2"},
-                // Mythic
-                {"minecraft:diamond|8|1|2", "minecraft:netherite_scrap|1|1|1", "minecraft:golden_apple|5|1|1",
-                        "minecraft:ender_pearl|5|1|2", "minecraft:experience_bottle|6|2|4",
+                {"minecraft:diamond|8|1|1", "minecraft:netherite_scrap|1|1|1", "minecraft:golden_apple|5|1|1",
+                        "minecraft:ender_pearl|5|1|2", "minecraft:experience_bottle|6|1|3",
                         "minecraft:shield|3|1|1|unbreaking=2,mending=1",
-                        "minecraft:diamond_chestplate|1|1|1|protection=1,unbreaking=2",
                         "minecraft:enchanted_book|2|1|1|unbreaking=3"},
-                // Apex
                 {"minecraft:diamond|8|1|3", "minecraft:netherite_scrap|2|1|1", "minecraft:netherite_ingot|1|1|1",
                         "minecraft:golden_apple|6|1|1", "minecraft:enchanted_golden_apple|1|1|1",
                         "minecraft:totem_of_undying|1|1|1",
@@ -327,13 +329,10 @@ public final class AscensionConfig {
                         "minecraft:enchanted_book|3|1|1|looting=3", "minecraft:enchanted_book|3|1|1|power=5",
                         "minecraft:enchanted_book|3|1|1|feather_falling=4", "minecraft:enchanted_book|3|1|1|thorns=3"}};
         private static final String[][] BONUS_LOOT = {
-                {"minecraft:iron_ingot|0.15|1|1"},
-                {"minecraft:diamond|0.05|1|1", "minecraft:emerald|0.2|1|1", "minecraft:golden_apple|0.02|1|1"},
-                {"minecraft:diamond|0.10|1|1", "minecraft:netherite_scrap|0.02|1|1",
-                        "minecraft:golden_apple|0.05|1|1"},
-                {"minecraft:netherite_ingot|0.03|1|1", "minecraft:enchanted_golden_apple|0.02|1|1",
-                        "minecraft:totem_of_undying|0.02|1|1", "minecraft:nether_star|0.005|1|1",
-                        "minecraft:enchanted_book|0.20|1|1|mending=1", "minecraft:enchanted_book|0.20|1|1|sharpness=5",
-                        "minecraft:enchanted_book|0.20|1|1|protection=4", "minecraft:enchanted_book|0.20|1|1|unbreaking=3"}};
+                {"minecraft:iron_ingot|0.20|1|1"},
+                {"minecraft:diamond|0.06|1|1", "minecraft:emerald|0.20|1|1", "minecraft:golden_apple|0.04|1|1"},
+                {"minecraft:netherite_scrap|0.06|1|1", "minecraft:golden_apple|0.10|1|1",
+                        "minecraft:ender_pearl|0.20|1|1"},
+                {"minecraft:beacon|0.02|1|1", "minecraft:nether_star|0.02|1|1", "minecraft:elytra|0.01|1|1"}};
     }
 }

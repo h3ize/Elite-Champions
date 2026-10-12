@@ -36,15 +36,12 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class ChampionEvents {
-
-    // ------------------------------------------------------------------ spawning
-
     /** Decides (once) whether a freshly spawned mob becomes a champion. */
     @SubscribeEvent
     public void onFinalizeSpawn(FinalizeSpawnEvent event) {
         Mob mob = event.getEntity();
         if (mob.level().isClientSide) return;
-        if (ChampionData.getPendingRank(mob) != null) return; // already decided (e.g. command)
+        if (ChampionData.getPendingRank(mob) != null) return;
         if (AscensionConfig.EXCLUDED_SPAWN_TYPES.get().contains(event.getSpawnType().name())) return;
         if (!ChampionFactory.isEligible(mob)) return;
 
@@ -64,8 +61,6 @@ public class ChampionEvents {
         ChampionFactory.apply(mob, level, rank);
     }
 
-    // ------------------------------------------------------------------ ticking
-
     @SubscribeEvent
     public void onTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Mob mob)) return;
@@ -74,8 +69,6 @@ public class ChampionEvents {
         if (rank == null) return;
         AbilityLogic.tick(mob, level, rank, ChampionData.getAbilities(mob));
     }
-
-    // ------------------------------------------------------------------ combat
 
     @SubscribeEvent
     public void onDamagePre(LivingDamageEvent.Pre event) {
@@ -95,20 +88,16 @@ public class ChampionEvents {
         float damage = event.getNewDamage();
         if (damage <= 0 || victim.level().isClientSide) return;
 
-        // champion attacking something
         if (source.getEntity() instanceof Mob attacker && ChampionData.getRank(attacker) != null) {
             AbilityLogic.onAttack(attacker, victim, damage, ChampionData.getAbilities(attacker));
         }
 
-        // champion being hit by melee
         if (victim instanceof Mob champion && ChampionData.getRank(champion) != null
                 && source.getEntity() instanceof LivingEntity attacker
                 && source.getDirectEntity() == attacker && !source.is(DamageTypes.THORNS)) {
             AbilityLogic.onDefend(champion, attacker, damage, ChampionData.getAbilities(champion));
         }
     }
-
-    // ------------------------------------------------------------------ death
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
@@ -118,7 +107,6 @@ public class ChampionEvents {
 
         AbilityLogic.onDeath(mob, level, ChampionData.getAbilities(mob));
 
-        // experience levels straight to the killer
         if (!ChampionData.isMinion(mob) && mob.getKillCredit() instanceof ServerPlayer killer) {
             int lvMin = AscensionConfig.rank(rank).killLevels.get();
             int lvMax = Math.max(lvMin, AscensionConfig.rank(rank).killLevelsMax.get());
@@ -157,8 +145,6 @@ public class ChampionEvents {
         event.setDroppedExperience((int) (event.getDroppedExperience() * AscensionConfig.rank(rank).xp.get()));
     }
 
-    // ------------------------------------------------------------------ loot
-
     @SubscribeEvent
     public void onDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof Mob mob) || !(mob.level() instanceof ServerLevel level)) return;
@@ -173,39 +159,47 @@ public class ChampionEvents {
 
         RandomSource random = mob.getRandom();
 
-        // 1) guaranteed gear drops: 1-2 pieces, any mix of armor and weapons
-        //    (1 armor + 1 weapon, 2 armor, or 2 weapons), with randomly worn durability
-        int gearMin = AscensionConfig.GEAR_DROP_MIN.get();
-        int gearMax = Math.max(gearMin, AscensionConfig.GEAR_DROP_MAX.get());
+        AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
+        int gearMin = cfg.gearDropsMin.get();
+        int gearMax = Math.max(gearMin, cfg.gearDropsMax.get());
         int count = gearMin + random.nextInt(gearMax - gearMin + 1);
+        boolean weapon = count > 0 && random.nextBoolean();
         List<EquipmentSlot> armorSlots = new ArrayList<>(List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                 EquipmentSlot.LEGS, EquipmentSlot.FEET));
         Collections.shuffle(armorSlots, new java.util.Random(random.nextLong()));
-        boolean weaponUsed = false;
-        for (int i = 0; i < count; i++) {
-            boolean weapon = armorSlots.isEmpty() || random.nextBoolean();
-            EquipmentSlot slot = weapon ? EquipmentSlot.MAINHAND : armorSlots.remove(0);
-            if (weapon && rank == Rank.APEX && random.nextBoolean()) {
-                // Apex weapon drop: bow with Power 7+ instead of the netherite tool
-                weaponUsed = true;
-                drop(event, mob, wear(ChampionLoot.apexBow(level, random), random));
-                continue;
+
+        if (weapon) {
+            ItemStack stack;
+            if (rank == Rank.APEX && random.nextBoolean()) {
+                stack = ChampionLoot.apexBow(level, random);
+            } else {
+                stack = mob.getItemBySlot(EquipmentSlot.MAINHAND);
+                if (!stack.isEmpty() && isModGear(stack)) {
+                    stack = stack.copy();
+                } else {
+                    stack = ChampionFactory.makeGear(level, rank, EquipmentSlot.MAINHAND, random);
+                }
             }
+            if (stack != null) drop(event, mob, wear(stack, random));
+            count--;
+        }
+        for (int i = 0; i < count && !armorSlots.isEmpty(); i++) {
+            EquipmentSlot slot = armorSlots.remove(0);
             ItemStack stack = mob.getItemBySlot(slot);
-            boolean useWorn = !stack.isEmpty() && isModGear(stack) && !(weapon && weaponUsed);
-            if (useWorn) {
+            if (!stack.isEmpty() && isModGear(stack)) {
                 stack = stack.copy();
             } else {
-                stack = ChampionFactory.makeGear(level, rank, slot, random); // nothing usable worn: generate a piece
+                stack = ChampionFactory.makeGear(level, rank, slot, random);
             }
-            if (weapon) weaponUsed = true;
             if (stack != null) drop(event, mob, wear(stack, random));
         }
 
-        // 2) guaranteed rank rewards (always) + weighted reward rolls + chance-based bonus loot
         for (ItemStack reward : ChampionLoot.roll(level, rank, random)) {
             drop(event, mob, reward);
         }
+
+        ItemStack head = ChampionLoot.head(mob, rank, random);
+        if (!head.isEmpty()) drop(event, mob, head);
     }
 
     /** Strips marker data and damages the item randomly (5%-85% durability used). */

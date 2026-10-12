@@ -33,13 +33,20 @@ Apex are the true threat of the mod:
 
 ## Rewards
 
-Rewards are intentionally modest and grow with rank. Every champion kill by a player gives:
-* **1-2 pieces of gear** (armor and/or weapons) with randomly worn durability.
-* **Guaranteed loot:** experience bottles; diamonds from Mythic; Apex always drops 2-4 experience bottles, 1-2 netherite ingots and an enchanted golden apple.
-* **Apex weapon drop:** either a netherite tool or a bow with Power 7+ (Unbreaking 3, Mending). Elytra never drop.
-* **Reward rolls** from a weighted pool: Veteran and Elite 0-1 rolls, Mythic and Apex 1 roll. The pool contains useful items for each tier; Apex can roll things like netherite, golden apples, totems of undying, and enchanted gear.
-* **Bonus loot:** small extra chances at better items (Apex can very rarely drop a netherite ingot or even a nether star).
-* **Experience levels:** Veteran 1-4, Elite 8-13, Mythic 13-18, Apex 18-26, plus normal XP orbs at reduced multipliers (0.5x / 0.6x / 0.75x / 1x).
+Rewards grow with rank. A champion kill by a player gives:
+* **Name:** every champion shows its rank in its name, e.g. "Veteran Zombie" (`rankInName`, `nameAlwaysVisible`).
+* **Gear (what the mob was wearing):** Veteran and Elite 1 piece, Mythic and Apex 1-2. A drop is armor and/or a single weapon, never two weapons, so Apex gives either 2 armor pieces or a weapon and an armor piece. Pieces have randomly worn durability. Apex weapon drops can be a bow with Power 5-6 (Unbreaking 3, Mending).
+* **Guaranteed loot:**
+  * Veteran: 1-2 experience bottles
+  * Elite: 2-3 experience bottles, 1 diamond
+  * Mythic: 2-4 experience bottles, 2-3 diamonds, 1 golden apple
+  * **Apex: 2-6 diamonds, 2 netherite ingots, 1 enchanted golden apple, 2-6 experience bottles**
+* **Reward rolls:** Veteran, Elite and Mythic always get 1 roll from a weighted pool; Apex gets none (its guaranteed loot is its reward).
+* **Bonus loot:** Veteran iron 20%; Elite diamond 6%, emerald 20%, golden apple 4%; Mythic netherite scrap 6%, golden apple 10%, ender pearl 20%; Apex beacon 2%, nether star 2%, elytra 1%.
+* **Mob head:** `headDropChance` Elite 1%, Mythic 2%, Apex 5%, for mobs that have a head (zombie, skeleton, wither skeleton, creeper, piglin).
+* **Apex armor:** a netherite set limited to 2 netherite pieces (`maxNetheritePieces`), the other 2 are diamond. Protection-type enchantments roll level 2-3.
+* **Enchant caps:** armor Veteran 1, Elite 2, Mythic 2, Apex 3; weapons Veteran 1, Elite 2, Mythic 3, Apex 5 (Apex Sharpness-type enchantments roll 3-5).
+* **Experience levels:** Veteran 1-3, Elite 2-5, Mythic 5-8, Apex 15-20, plus normal XP orbs at 0.35x / 0.4x / 0.5x / 0.6x.
 
 Minions created by Splitting drop nothing by default.
 

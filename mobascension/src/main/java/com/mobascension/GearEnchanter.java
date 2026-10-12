@@ -28,9 +28,15 @@ public final class GearEnchanter {
             Enchantments.FIRE_ASPECT, Enchantments.KNOCKBACK, Enchantments.LOOTING,
             Enchantments.SWEEPING_EDGE, Enchantments.DENSITY, Enchantments.BREACH, Enchantments.WIND_BURST);
 
+    private static final List<ResourceKey<Enchantment>> PROTECTIONS = List.of(
+            Enchantments.PROTECTION, Enchantments.FIRE_PROTECTION, Enchantments.BLAST_PROTECTION,
+            Enchantments.PROJECTILE_PROTECTION);
+    private static final List<ResourceKey<Enchantment>> DAMAGE = List.of(
+            Enchantments.SHARPNESS, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS);
+
     private GearEnchanter() {}
 
-    public static void enchant(ItemStack stack, Rank rank, RegistryAccess access, RandomSource random) {
+    public static void enchant(ItemStack stack, Rank rank, boolean weapon, RegistryAccess access, RandomSource random) {
         AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
         Registry<Enchantment> registry = access.registryOrThrow(Registries.ENCHANTMENT);
 
@@ -38,7 +44,7 @@ public final class GearEnchanter {
         Collections.shuffle(pool, new Random(random.nextLong()));
 
         int wanted = cfg.enchantCount.get();
-        int cap = cfg.maxEnchantLevel.get();
+        int cap = weapon ? cfg.weaponEnchantLevel.get() : cfg.maxEnchantLevel.get();
         List<Holder<Enchantment>> chosen = new ArrayList<>();
 
         for (ResourceKey<Enchantment> key : pool) {
@@ -46,14 +52,18 @@ public final class GearEnchanter {
             Optional<Holder.Reference<Enchantment>> holder = registry.getHolder(key);
             if (holder.isEmpty()) continue;
             Holder<Enchantment> h = holder.get();
-            if (!h.value().canEnchant(stack)) continue;           // only enchants that fit this item
+            if (!h.value().canEnchant(stack)) continue;
             boolean compatible = true;
             for (Holder<Enchantment> other : chosen) {
                 if (!Enchantment.areCompatible(h, other)) { compatible = false; break; }
             }
-            if (!compatible) continue;                              // e.g. no Sharpness + Smite
+            if (!compatible) continue;
 
-            int level = Math.max(1, Math.min(h.value().getMaxLevel(), cap));
+            int hi = Math.max(1, Math.min(h.value().getMaxLevel(), cap));
+            int lo = hi;
+            if (!weapon && PROTECTIONS.contains(key) && hi >= 3) lo = hi - 1;
+            if (weapon && DAMAGE.contains(key) && hi >= 4) lo = hi - 2;
+            int level = lo + random.nextInt(hi - lo + 1);
             stack.enchant(h, level);
             chosen.add(h);
         }

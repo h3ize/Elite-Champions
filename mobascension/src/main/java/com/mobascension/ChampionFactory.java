@@ -50,11 +50,8 @@ public final class ChampionFactory {
         return ResourceLocation.fromNamespaceAndPath(MobAscension.MODID, path);
     }
 
-    // ------------------------------------------------------------------ eligibility / rolling
-
     public static boolean isEligible(Mob mob) {
         if (!AscensionConfig.ENABLED.get()) return false;
-        // Hard guarantee: these three are never affected, whatever the config says.
         if (mob instanceof Warden || mob instanceof EnderDragon || mob instanceof WitherBoss) return false;
         if (ChampionData.isMinion(mob)) return false;
 
@@ -99,29 +96,23 @@ public final class ChampionFactory {
         return 1.0 + AscensionConfig.rank(rank).damage.get() * statScale(mob, rank);
     }
 
-    // ------------------------------------------------------------------ apply
-
     public static void apply(Mob mob, ServerLevel level, Rank rank) {
         AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
         RandomSource random = mob.getRandom();
 
-        // every champion rolls its own stat level between the rank's min and max
-        // (Veteran 3-5, Elite 14-20, Mythic 7-13, Apex 25-30)
         int maxLevel = Math.max(1, cfg.statLevel.get());
         int minLevel = Math.max(1, Math.min(cfg.statLevelMin.get(), maxLevel));
         int level = minLevel + random.nextInt(maxLevel - minLevel + 1);
         ChampionData.setLevel(mob, level);
         double s = level / 5.0;
 
-        // abilities first (Aegis needs an attribute)
         List<Ability> abilities = rollAbilities(mob, rank, cfg);
         ChampionData.setAbilities(mob, abilities);
 
-        // stats
         mod(mob, Attributes.MAX_HEALTH, "health", cfg.health.get() * s, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         mod(mob, Attributes.ARMOR, "armor", cfg.armor.get() * s, AttributeModifier.Operation.ADD_VALUE);
         mod(mob, Attributes.ARMOR_TOUGHNESS, "toughness", cfg.toughness.get() * s, AttributeModifier.Operation.ADD_VALUE);
-        double speedBonus = Math.min(1.0, cfg.speed.get() * s); // capped at +100% so high levels stay fair
+        double speedBonus = Math.min(1.0, cfg.speed.get() * s);
         mod(mob, Attributes.MOVEMENT_SPEED, "speed", speedBonus, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         mod(mob, Attributes.FLYING_SPEED, "flying_speed", speedBonus, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         mod(mob, Attributes.ATTACK_DAMAGE, "damage", cfg.damage.get() * s, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -136,15 +127,13 @@ public final class ChampionFactory {
         }
         mob.setHealth(mob.getMaxHealth());
 
-        // effects
         if (cfg.fireResistant.get()) infinite(mob, MobEffects.FIRE_RESISTANCE);
         if (random.nextDouble() < cfg.weaving.get()) infinite(mob, MobEffects.WEAVING);
         if (random.nextDouble() < cfg.infested.get()) infinite(mob, MobEffects.INFESTED);
         if (random.nextDouble() < cfg.oozing.get()) infinite(mob, MobEffects.OOZING);
         if (rank == Rank.APEX) {
-            infinite(mob, MobEffects.DAMAGE_BOOST, 1);        // Strength II
-            infinite(mob, MobEffects.DAMAGE_RESISTANCE, 0);   // Resistance I
-            // plus two random harmless-to-it buffs; never regeneration, poison, wither, instant health/damage etc.
+            infinite(mob, MobEffects.DAMAGE_BOOST, 1);
+            infinite(mob, MobEffects.DAMAGE_RESISTANCE, 0);
             List<Holder<net.minecraft.world.effect.MobEffect>> extras = new ArrayList<>(List.of(
                     MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.FIRE_RESISTANCE, MobEffects.WATER_BREATHING,
                     MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED, MobEffects.ABSORPTION));
@@ -164,16 +153,15 @@ public final class ChampionFactory {
         }
 
         if (rank == Rank.APEX && (!(mob instanceof Enemy) || random.nextDouble() < cfg.rangedChance.get())) {
-            // only Apex ever shoots; passive Apex mobs always do (it is their only attack)
             mob.getPersistentData().putBoolean(ChampionData.RANGED, true);
         }
 
         equip(mob, level, rank, cfg);
 
-        // glow outline color (no name tag, so nothing is visible through walls except the outline while glowing)
+        if (AscensionConfig.RANK_IN_NAME.get()) applyName(mob, rank, cfg);
+
         if (AscensionConfig.GLOW_COLORS.get()) applyTeam(mob, level, rank);
 
-        // announcement
         if (cfg.announce.get()) {
             double r = AscensionConfig.ANNOUNCE_RADIUS.get();
             StringBuilder ab = new StringBuilder();
@@ -210,7 +198,6 @@ public final class ChampionFactory {
     }
 
     private static void infinite(Mob mob, Holder<net.minecraft.world.effect.MobEffect> effect, int amplifier) {
-        // ambient=false, particles visible=true, HUD/status icon showIcon=true -> effect is never hidden
         mob.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION, amplifier, false, true, true));
     }
 
@@ -220,6 +207,12 @@ public final class ChampionFactory {
         ResourceLocation id = id(name);
         inst.removeModifier(id);
         inst.addPermanentModifier(new AttributeModifier(id, amount, op));
+    }
+
+    private static void applyName(Mob mob, Rank rank, AscensionConfig.RankSettings cfg) {
+        Component base = mob.hasCustomName() ? mob.getCustomName().copy() : mob.getType().getDescription().copy();
+        mob.setCustomName(Component.literal(cfg.displayName.get() + " ").append(base).withStyle(rank.format));
+        mob.setCustomNameVisible(AscensionConfig.NAME_ALWAYS_VISIBLE.get());
     }
 
     private static void applyTeam(Mob mob, ServerLevel level, Rank rank) {
@@ -234,8 +227,6 @@ public final class ChampionFactory {
         sb.addPlayerToTeam(mob.getScoreboardName(), team);
     }
 
-    // ------------------------------------------------------------------ gear
-
     private static void equip(Mob mob, ServerLevel level, Rank rank, AscensionConfig.RankSettings cfg) {
         if (!(mob instanceof Enemy)) return;
         RandomSource random = mob.getRandom();
@@ -246,6 +237,8 @@ public final class ChampionFactory {
             if (!mob.getItemBySlot(slot).isEmpty() && !replace) continue;
             giveGear(mob, level, rank, cfg, slot, random);
         }
+
+        limitNetherite(mob, level, rank, cfg, random);
 
         if (!(mob instanceof RangedAttackMob) && random.nextDouble() < cfg.gearChance.get()) {
             ItemStack current = mob.getMainHandItem();
@@ -262,7 +255,7 @@ public final class ChampionFactory {
         if (stack == null) return;
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(GEAR_TAG, true));
         mob.setItemSlot(slot, stack);
-        mob.setDropChance(slot, 0.0F); // drops are handled by Mob Ascension (see ChampionEvents)
+        mob.setDropChance(slot, 0.0F);
     }
 
     /** Builds one piece of champion gear: base item from config, vanilla enchants, vanilla trim. Null if none configured. */
@@ -270,13 +263,49 @@ public final class ChampionFactory {
         AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
         ItemStack stack = pickItem(cfg, slot, random);
         if (stack == null) return null;
+        finishGear(stack, level, rank, slot, random);
+        return stack;
+    }
+
+    private static void finishGear(ItemStack stack, ServerLevel level, Rank rank, EquipmentSlot slot, RandomSource random) {
+        AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
         if (slot != EquipmentSlot.MAINHAND && random.nextDouble() < cfg.trim.get()) {
             applyTrim(stack, level, random);
         }
         if (random.nextDouble() < cfg.enchantChance.get()) {
-            GearEnchanter.enchant(stack, rank, level.registryAccess(), random);
+            GearEnchanter.enchant(stack, rank, slot == EquipmentSlot.MAINHAND, level.registryAccess(), random);
         }
-        return stack;
+    }
+
+    private static boolean isNetherite(ItemStack stack) {
+        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("netherite_");
+    }
+
+    private static Item diamondFor(EquipmentSlot slot) {
+        return switch (slot) {
+            case HEAD -> Items.DIAMOND_HELMET;
+            case CHEST -> Items.DIAMOND_CHESTPLATE;
+            case LEGS -> Items.DIAMOND_LEGGINGS;
+            default -> Items.DIAMOND_BOOTS;
+        };
+    }
+
+    private static void limitNetherite(Mob mob, ServerLevel level, Rank rank, AscensionConfig.RankSettings cfg, RandomSource random) {
+        List<EquipmentSlot> netherite = new ArrayList<>();
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            if (isNetherite(mob.getItemBySlot(slot))) netherite.add(slot);
+        }
+        int max = cfg.maxNetheritePieces.get();
+        if (netherite.size() <= max) return;
+        Collections.shuffle(netherite, new Random(random.nextLong()));
+        for (int i = max; i < netherite.size(); i++) {
+            EquipmentSlot slot = netherite.get(i);
+            ItemStack stack = new ItemStack(diamondFor(slot));
+            finishGear(stack, level, rank, slot, random);
+            CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(GEAR_TAG, true));
+            mob.setItemSlot(slot, stack);
+            mob.setDropChance(slot, 0.0F);
+        }
     }
 
     /** Random trim, restricted to vanilla (minecraft:) patterns and materials. */
