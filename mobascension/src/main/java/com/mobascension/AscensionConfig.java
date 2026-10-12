@@ -127,7 +127,7 @@ public final class AscensionConfig {
         public final ModConfigSpec.ConfigValue<String> displayName;
 
         public final ModConfigSpec.DoubleValue health, armor, toughness, speed, damage, knockback,
-                regen, fall, size, xp;
+                fall, size, xp;
 
         public final ModConfigSpec.IntValue abilityCount;
         public final ModConfigSpec.DoubleValue weaving, infested, oozing;
@@ -171,8 +171,6 @@ public final class AscensionConfig {
                     .defineInRange("damageBonus", new double[]{0.35, 0.8, 1.5, 2.75}[i], 0.0, 100.0);
             knockback = b.comment("Knockback resistance (0-1) at level 5.")
                     .defineInRange("knockbackResistance", new double[]{0.1, 0.25, 0.5, 0.8}[i], 0.0, 1.0);
-            regen = b.comment("Health regenerated per second at level 5.")
-                    .defineInRange("regenPerSecond", new double[]{0, 0.25, 0.5, 1.0}[i], 0.0, 1000.0);
             fall = b.comment("Extra blocks of safe fall distance at level 5.")
                     .defineInRange("safeFallBonus", new double[]{5, 10, 20, 40}[i], 0.0, 1000.0);
             size = b.comment("Extra body size as a fraction at level 5 (0.2 = 20% bigger).")

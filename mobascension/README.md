@@ -15,7 +15,7 @@ The rest (~70%) stay normal mobs. The Warden, Ender Dragon and Wither can never 
 
 **Random power.** Every champion rolls its own stat level inside its rank's range. Level 5 equals the base values in the config, level 10 is double, and so on, so no two champions are exactly alike. A weak Apex is still far stronger than a strong Elite.
 
-**Stats.** Champions gain extra health, armor, toughness, movement speed (capped at +100%), attack damage, knockback resistance, health regeneration, safe fall distance and body size, and are immune to fire and lava. The damage bonus also applies to arrows, tridents and fireballs.
+**Stats.** Champions gain extra health, armor, toughness, movement speed (capped at +100%), attack damage, knockback resistance, safe fall distance and body size, and are immune to fire and lava. The damage bonus also applies to arrows, tridents and fireballs.
 
 **Effects.** Champions can spawn with the permanent Weaving, Infested or Oozing effects (higher ranks are more likely to). All effects are visible. Every champion glows with a rank-coloured outline for a few seconds on spawn and is surrounded by a rank-coloured particle aura. Apex spawns are announced to nearby players, and Mythic and Apex deaths set off fireworks.
 

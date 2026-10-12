@@ -135,7 +135,7 @@ public final class ChampionFactory {
             infinite(mob, MobEffects.DAMAGE_BOOST, 1);
             List<Holder<net.minecraft.world.effect.MobEffect>> extras = new ArrayList<>(List.of(
                     MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.FIRE_RESISTANCE, MobEffects.WATER_BREATHING,
-                    MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED, MobEffects.ABSORPTION));
+                    MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED));
             Collections.shuffle(extras, new Random(random.nextLong()));
             int added = 0;
             for (Holder<net.minecraft.world.effect.MobEffect> e : extras) {
@@ -150,6 +150,8 @@ public final class ChampionFactory {
             int ticks = glow < 0 ? MobEffectInstance.INFINITE_DURATION : glow * 20;
             mob.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, true, true));
         }
+
+        mob.setHealth(mob.getMaxHealth());
 
         if (rank == Rank.APEX && (!(mob instanceof Enemy) || random.nextDouble() < cfg.rangedChance.get())) {
             mob.getPersistentData().putBoolean(ChampionData.RANGED, true);

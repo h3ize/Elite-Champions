@@ -44,11 +44,6 @@ public final class AbilityLogic {
     public static void tick(Mob mob, ServerLevel level, Rank rank, EnumSet<Ability> abilities) {
         AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
 
-        if (mob.tickCount % 20 == 0) {
-            double regen = cfg.regen.get() * ChampionFactory.statScale(mob, rank);
-            if (regen > 0 && mob.getHealth() < mob.getMaxHealth()) mob.heal((float) regen);
-        }
-
         if (AscensionConfig.PARTICLES.get() && mob.tickCount % 10 == 0) {
             double w = mob.getBbWidth();
             level.sendParticles(rank.particle(), mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(),
