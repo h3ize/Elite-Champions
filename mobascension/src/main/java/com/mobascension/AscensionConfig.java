@@ -227,9 +227,9 @@ public final class AscensionConfig {
             b.pop();
 
             killLevels = b.comment("Minimum experience LEVELS given directly to the player who kills this rank.")
-                    .defineInRange("killLevels", new int[]{0, 1, 2, 8}[i], 0, 1000);
+                    .defineInRange("killLevels", new int[]{1, 8, 13, 18}[i], 0, 1000);
             killLevelsMax = b.comment("Maximum experience LEVELS given to the killer (a random amount between min and max).")
-                    .defineInRange("killLevelsMax", new int[]{1, 2, 4, 20}[i], 0, 1000);
+                    .defineInRange("killLevelsMax", new int[]{4, 13, 18, 26}[i], 0, 1000);
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
@@ -283,7 +283,7 @@ public final class AscensionConfig {
                 {"minecraft:stone_sword", "minecraft:stone_axe", "minecraft:iron_sword"},
                 {"minecraft:iron_sword", "minecraft:iron_axe"},
                 {"minecraft:diamond_sword", "minecraft:diamond_axe"},
-                {"minecraft:netherite_sword", "minecraft:netherite_axe", "minecraft:mace"}};
+                {"minecraft:netherite_sword", "minecraft:netherite_axe"}};
         private static final String[][] GUARANTEED_LOOT = {
                 // Veteran
                 {"minecraft:experience_bottle|1.0|1|1"},
@@ -294,7 +294,8 @@ public final class AscensionConfig {
                         "minecraft:diamond|1.0|1|1"},
                 // Apex
                 {"minecraft:experience_bottle|1.0|2|4",
-                        "minecraft:diamond|1.0|1|2"}};
+                        "minecraft:netherite_ingot|1.0|1|2",
+                        "minecraft:enchanted_golden_apple|1.0|1|1"}};
         private static final String[][] REWARD_POOL = {
                 // Veteran
                 {"minecraft:iron_ingot|12|1|3", "minecraft:gold_ingot|8|1|2", "minecraft:emerald|6|1|2",
@@ -320,13 +321,19 @@ public final class AscensionConfig {
                         "minecraft:shield|3|1|1|unbreaking=3,mending=1",
                         "minecraft:netherite_sword|1|1|1|sharpness=3,unbreaking=2",
                         "minecraft:netherite_pickaxe|1|1|1|efficiency=3,unbreaking=2",
-                        "minecraft:enchanted_book|2|1|1|mending=1", "minecraft:enchanted_book|2|1|1|protection=3"}};
+                        "minecraft:enchanted_book|3|1|1|mending=1", "minecraft:enchanted_book|3|1|1|protection=4",
+                        "minecraft:enchanted_book|3|1|1|sharpness=5", "minecraft:enchanted_book|3|1|1|unbreaking=3",
+                        "minecraft:enchanted_book|3|1|1|efficiency=5", "minecraft:enchanted_book|3|1|1|fortune=3",
+                        "minecraft:enchanted_book|3|1|1|looting=3", "minecraft:enchanted_book|3|1|1|power=5",
+                        "minecraft:enchanted_book|3|1|1|feather_falling=4", "minecraft:enchanted_book|3|1|1|thorns=3"}};
         private static final String[][] BONUS_LOOT = {
                 {"minecraft:iron_ingot|0.15|1|1"},
                 {"minecraft:diamond|0.05|1|1", "minecraft:emerald|0.2|1|1", "minecraft:golden_apple|0.02|1|1"},
                 {"minecraft:diamond|0.10|1|1", "minecraft:netherite_scrap|0.02|1|1",
                         "minecraft:golden_apple|0.05|1|1"},
                 {"minecraft:netherite_ingot|0.03|1|1", "minecraft:enchanted_golden_apple|0.02|1|1",
-                        "minecraft:totem_of_undying|0.02|1|1", "minecraft:nether_star|0.005|1|1"}};
+                        "minecraft:totem_of_undying|0.02|1|1", "minecraft:nether_star|0.005|1|1",
+                        "minecraft:enchanted_book|0.20|1|1|mending=1", "minecraft:enchanted_book|0.20|1|1|sharpness=5",
+                        "minecraft:enchanted_book|0.20|1|1|protection=4", "minecraft:enchanted_book|0.20|1|1|unbreaking=3"}};
     }
 }

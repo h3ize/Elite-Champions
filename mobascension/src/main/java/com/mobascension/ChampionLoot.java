@@ -78,6 +78,18 @@ public final class ChampionLoot {
         return out;
     }
 
+    /** Apex weapon drop alternative: a bow with Power 7 (sometimes 8), Unbreaking 3 and Mending. */
+    public static ItemStack apexBow(ServerLevel level, RandomSource random) {
+        ItemStack bow = new ItemStack(Items.BOW);
+        Registry<Enchantment> registry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        // set directly (not through the vanilla-max cap used for config lines) so Power can exceed 5
+        registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.POWER)
+                .ifPresent(h -> bow.enchant(h, 7 + random.nextInt(2)));
+        registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING).ifPresent(h -> bow.enchant(h, 3));
+        registry.getHolder(net.minecraft.world.item.enchantment.Enchantments.MENDING).ifPresent(h -> bow.enchant(h, 1));
+        return bow;
+    }
+
     private static final class Entry {
         final Item item;
         final double value;
@@ -100,7 +112,7 @@ public final class ChampionLoot {
                 ResourceLocation id = ResourceLocation.tryParse(p[0].trim());
                 if (id == null) return null;
                 Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(Items.AIR);
-                if (item == Items.AIR) return null;
+                if (item == Items.AIR || item == Items.ELYTRA) return null; // elytra never drops
                 double value = Double.parseDouble(p[1].trim());
                 int min = Integer.parseInt(p[2].trim());
                 int max = Math.max(min, Integer.parseInt(p[3].trim()));

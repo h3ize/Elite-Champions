@@ -185,6 +185,12 @@ public class ChampionEvents {
         for (int i = 0; i < count; i++) {
             boolean weapon = armorSlots.isEmpty() || random.nextBoolean();
             EquipmentSlot slot = weapon ? EquipmentSlot.MAINHAND : armorSlots.remove(0);
+            if (weapon && rank == Rank.APEX && random.nextBoolean()) {
+                // Apex weapon drop: bow with Power 7+ instead of the netherite tool
+                weaponUsed = true;
+                drop(event, mob, wear(ChampionLoot.apexBow(level, random), random));
+                continue;
+            }
             ItemStack stack = mob.getItemBySlot(slot);
             boolean useWorn = !stack.isEmpty() && isModGear(stack) && !(weapon && weaponUsed);
             if (useWorn) {

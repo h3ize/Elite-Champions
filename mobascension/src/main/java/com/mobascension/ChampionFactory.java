@@ -141,6 +141,22 @@ public final class ChampionFactory {
         if (random.nextDouble() < cfg.weaving.get()) infinite(mob, MobEffects.WEAVING);
         if (random.nextDouble() < cfg.infested.get()) infinite(mob, MobEffects.INFESTED);
         if (random.nextDouble() < cfg.oozing.get()) infinite(mob, MobEffects.OOZING);
+        if (rank == Rank.APEX) {
+            infinite(mob, MobEffects.DAMAGE_BOOST, 1);        // Strength II
+            infinite(mob, MobEffects.DAMAGE_RESISTANCE, 0);   // Resistance I
+            // plus two random harmless-to-it buffs; never regeneration, poison, wither, instant health/damage etc.
+            List<Holder<net.minecraft.world.effect.MobEffect>> extras = new ArrayList<>(List.of(
+                    MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.FIRE_RESISTANCE, MobEffects.WATER_BREATHING,
+                    MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED, MobEffects.ABSORPTION));
+            Collections.shuffle(extras, new Random(random.nextLong()));
+            int added = 0;
+            for (Holder<net.minecraft.world.effect.MobEffect> e : extras) {
+                if (added >= 2) break;
+                if (mob.hasEffect(e)) continue;
+                infinite(mob, e, 0);
+                added++;
+            }
+        }
         int glow = cfg.glowSeconds.get();
         if (glow != 0) {
             int ticks = glow < 0 ? MobEffectInstance.INFINITE_DURATION : glow * 20;
@@ -190,8 +206,12 @@ public final class ChampionFactory {
     }
 
     private static void infinite(Mob mob, Holder<net.minecraft.world.effect.MobEffect> effect) {
+        infinite(mob, effect, 0);
+    }
+
+    private static void infinite(Mob mob, Holder<net.minecraft.world.effect.MobEffect> effect, int amplifier) {
         // ambient=false, particles visible=true, HUD/status icon showIcon=true -> effect is never hidden
-        mob.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION, 0, false, true, true));
+        mob.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION, amplifier, false, true, true));
     }
 
     private static void mod(Mob mob, Holder<Attribute> attr, String name, double amount, AttributeModifier.Operation op) {

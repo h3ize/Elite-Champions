@@ -22,7 +22,7 @@ The rest (~70%) stay normal mobs. The Warden, Ender Dragon and Wither can never 
 **Abilities.** Champions roll random special abilities (higher ranks roll more):
 Vampiric (heals on hit), Thorned (reflects melee damage), Frostbite (slows and freezes), Venomous (poisons), Berserker (enraged at low health), Aegis (regenerating shield), Blinker (teleports to you), Volatile (explodes on death), Splitting (spawns minions on death) and Stormcaller (calls lightning). Each ability has its own minimum rank, power and cooldown in the config.
 
-**Gear.** Champions are armoured and armed according to their rank (leather and chainmail up to netherite and mace). Gear can carry random vanilla armor trims and vanilla enchantments, never above the vanilla maximum and capped per rank.
+**Gear.** Champions are armoured and armed according to their rank (leather and chainmail up to netherite). Gear can carry random vanilla armor trims and vanilla enchantments, never above the vanilla maximum and capped per rank.
 
 ## Apex champions
 
@@ -35,10 +35,11 @@ Apex are the true threat of the mod:
 
 Rewards are intentionally modest and grow with rank. Every champion kill by a player gives:
 * **1-2 pieces of gear** (armor and/or weapons) with randomly worn durability.
-* **Guaranteed loot:** experience bottles, plus diamonds from Mythic upward.
+* **Guaranteed loot:** experience bottles; diamonds from Mythic; Apex always drops 2-4 experience bottles, 1-2 netherite ingots and an enchanted golden apple.
+* **Apex weapon drop:** either a netherite tool or a bow with Power 7+ (Unbreaking 3, Mending). Elytra never drop.
 * **Reward rolls** from a weighted pool: Veteran and Elite 0-1 rolls, Mythic and Apex 1 roll. The pool contains useful items for each tier; Apex can roll things like netherite, golden apples, totems of undying, and enchanted gear.
 * **Bonus loot:** small extra chances at better items (Apex can very rarely drop a netherite ingot or even a nether star).
-* **Experience levels:** Veteran 0-1, Elite 1-2, Mythic 2-4, Apex 8-20, plus normal XP orbs at reduced multipliers (0.5x / 0.6x / 0.75x / 1x).
+* **Experience levels:** Veteran 1-4, Elite 8-13, Mythic 13-18, Apex 18-26, plus normal XP orbs at reduced multipliers (0.5x / 0.6x / 0.75x / 1x).
 
 Minions created by Splitting drop nothing by default.
 
