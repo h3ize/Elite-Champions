@@ -57,8 +57,8 @@ public final class AscensionConfig {
                         List.of("SPAWNER", "TRIAL_SPAWNER", "BREEDING", "BUCKET", "CONVERSION"),
                         () -> "SPAWNER", o -> o instanceof String);
         COMMON_WEIGHT = b.comment("Spawn weight of normal (non-champion) mobs. Compare against the rank weights.",
-                "Defaults give about 70% normal, 17% Veteran, 9% Elite, 3.2% Mythic, 0.8% Apex.")
-                .defineInRange("normalWeight", 70.0, 0.0, 100000.0);
+                "Defaults give about 93.6% normal, 3.7% Veteran, 1.9% Elite, 0.66% Mythic, 0.14% Apex.")
+                .defineInRange("normalWeight", 100.0, 0.0, 100000.0);
         REPLACE_VANILLA_GEAR = b.comment("Replace armor/weapons mobs spawned with by vanilla.")
                 .define("replaceVanillaGear", true);
         REQUIRE_PLAYER_KILL = b.comment("Gear and bonus loot only drop if a player gets the kill.")
@@ -74,7 +74,7 @@ public final class AscensionConfig {
                 .define("rankInName", true);
         NAME_ALWAYS_VISIBLE = b.comment("Show the rank name above champions all the time (visible through walls).",
                 "If false, the name only shows while you look directly at the mob.")
-                .define("nameAlwaysVisible", true);
+                .define("nameAlwaysVisible", false);
         ANNOUNCE_RADIUS = b.comment("Radius (blocks) in which players are told about announced champions.")
                 .defineInRange("announceRadius", 96, 8, 1024);
         APEX_AGGRO_RADIUS = b.comment("Apex champions automatically target the nearest player within this many blocks (0 = off).")
@@ -148,7 +148,7 @@ public final class AscensionConfig {
             b.push(rank.id);
 
             weight = b.comment("Relative spawn weight of this rank (0 disables the rank).")
-                    .defineInRange("weight", new double[]{17.0, 9.0, 3.2, 0.8}[i], 0.0, 100000.0);
+                    .defineInRange("weight", new double[]{4.0, 2.0, 0.7, 0.15}[i], 0.0, 100000.0);
             displayName = b.define("displayName", rank.defaultName);
 
             b.push("stats");
@@ -238,9 +238,9 @@ public final class AscensionConfig {
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 0}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 1}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 0}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 2}[i], 0, 64);
             headChance = b.comment("Chance to drop the champion's own head (only zombie, skeleton, wither skeleton, creeper and piglin have one).")
                     .defineInRange("headDropChance", new double[]{0.0, 0.01, 0.02, 0.05}[i], 0.0, 1.0);
             rewardPool = b.comment("Weighted pool the guaranteed rolls pick from.",
@@ -298,10 +298,12 @@ public final class AscensionConfig {
                 {"minecraft:experience_bottle|1.0|2|4",
                         "minecraft:diamond|1.0|2|3",
                         "minecraft:golden_apple|1.0|1|1"},
-                {"minecraft:diamond|1.0|2|6",
+                {"minecraft:diamond|1.0|3|8",
                         "minecraft:netherite_ingot|1.0|2|2",
-                        "minecraft:enchanted_golden_apple|1.0|1|1",
-                        "minecraft:experience_bottle|1.0|2|6"}};
+                        "minecraft:enchanted_golden_apple|1.0|1|2",
+                        "minecraft:golden_apple|1.0|2|4",
+                        "minecraft:emerald|1.0|4|10",
+                        "minecraft:experience_bottle|1.0|3|8"}};
         private static final String[][] REWARD_POOL = {
                 {"minecraft:iron_ingot|12|1|2", "minecraft:gold_ingot|8|1|1", "minecraft:emerald|6|1|1",
                         "minecraft:cooked_beef|10|2|4",
@@ -315,7 +317,7 @@ public final class AscensionConfig {
                         "minecraft:ender_pearl|5|1|2", "minecraft:experience_bottle|6|1|3",
                         "minecraft:shield|3|1|1|unbreaking=2,mending=1",
                         "minecraft:enchanted_book|2|1|1|unbreaking=3"},
-                {"minecraft:diamond|8|1|3", "minecraft:netherite_scrap|2|1|1", "minecraft:netherite_ingot|1|1|1",
+                {"minecraft:diamond|8|1|3", "minecraft:netherite_scrap|2|1|1",
                         "minecraft:golden_apple|6|1|1", "minecraft:enchanted_golden_apple|1|1|1",
                         "minecraft:totem_of_undying|1|1|1",
                         "minecraft:shield|3|1|1|unbreaking=3,mending=1",
@@ -331,6 +333,7 @@ public final class AscensionConfig {
                 {"minecraft:diamond|0.06|1|1", "minecraft:emerald|0.20|1|1", "minecraft:golden_apple|0.04|1|1"},
                 {"minecraft:netherite_scrap|0.06|1|1", "minecraft:golden_apple|0.10|1|1",
                         "minecraft:ender_pearl|0.20|1|1"},
-                {"minecraft:beacon|0.02|1|1", "minecraft:nether_star|0.02|1|1", "minecraft:elytra|0.01|1|1"}};
+                {"minecraft:beacon|0.02|1|1", "minecraft:nether_star|0.02|1|1", "minecraft:elytra|0.01|1|1",
+                        "minecraft:totem_of_undying|0.08|1|1", "minecraft:enchanted_book|0.10|1|1|mending=1"}};
     }
 }

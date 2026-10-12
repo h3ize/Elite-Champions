@@ -120,11 +120,6 @@ public final class ChampionFactory {
         mod(mob, Attributes.SAFE_FALL_DISTANCE, "fall", cfg.fall.get() * s, AttributeModifier.Operation.ADD_VALUE);
         mod(mob, Attributes.SCALE, "size", cfg.size.get() * s, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         mod(mob, Attributes.FOLLOW_RANGE, "follow", 4.0 * (rank.ordinal() + 1), AttributeModifier.Operation.ADD_VALUE);
-        if (abilities.contains(Ability.AEGIS)) {
-            double shield = AscensionConfig.ability(Ability.AEGIS).power.get();
-            mod(mob, Attributes.MAX_ABSORPTION, "aegis", shield, AttributeModifier.Operation.ADD_VALUE);
-            mob.setAbsorptionAmount((float) shield);
-        }
         mob.setHealth(mob.getMaxHealth());
 
         if (cfg.fireResistant.get()) infinite(mob, MobEffects.FIRE_RESISTANCE);

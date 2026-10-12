@@ -14,6 +14,7 @@ public final class ChampionData {
     public static final String MINION = "mobascension_minion";
     public static final String RANGED = "mobascension_ranged";
     public static final String LEVEL = "mobascension_level";
+    public static final String HEALED = "mobascension_healed";
 
     private ChampionData() {}
 

@@ -69,12 +69,6 @@ public final class AbilityLogic {
         if (abilities.contains(Ability.BERSERKER) && mob.tickCount % 10 == 0) {
             berserk(mob, level);
         }
-        if (abilities.contains(Ability.AEGIS) && ready(mob, Ability.AEGIS)) {
-            float max = mob.getMaxAbsorption();
-            if (mob.getAbsorptionAmount() < max) {
-                mob.setAbsorptionAmount(Math.min(max, mob.getAbsorptionAmount() + (float) power(Ability.AEGIS) * 0.25F));
-            }
-        }
         LivingEntity target = mob.getTarget();
         if (target == null || !target.isAlive()) return;
 

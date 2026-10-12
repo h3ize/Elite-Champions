@@ -67,6 +67,10 @@ public class ChampionEvents {
         if (!(mob.level() instanceof ServerLevel level) || !mob.isAlive()) return;
         Rank rank = ChampionData.getRank(mob);
         if (rank == null) return;
+        if (!mob.getPersistentData().getBoolean(ChampionData.HEALED)) {
+            mob.getPersistentData().putBoolean(ChampionData.HEALED, true);
+            mob.setHealth(mob.getMaxHealth());
+        }
         AbilityLogic.tick(mob, level, rank, ChampionData.getAbilities(mob));
     }
 

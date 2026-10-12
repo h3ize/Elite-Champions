@@ -10,7 +10,6 @@ public enum Ability {
     FROSTBITE("frostbite", "Frostbite", 1, 5.0, 0),
     VENOMOUS("venomous", "Venomous", 1, 4.0, 0),
     BERSERKER("berserker", "Berserker", 2, 0.5, 0),
-    AEGIS("aegis", "Aegis", 2, 8.0, 100),
     BLINKER("blinker", "Blinker", 2, 16.0, 160),
     VOLATILE("volatile", "Volatile", 3, 2.5, 0),
     SPLITTING("splitting", "Splitting", 3, 2.0, 0),
