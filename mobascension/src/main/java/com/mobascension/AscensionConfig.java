@@ -238,14 +238,14 @@ public final class AscensionConfig {
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 3}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 2, 3}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 5}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 2, 3, 5}[i], 0, 64);
             bookCountMin = b.comment("Random enchanted books dropped per kill (minimum). Each is a different random positive",
                     "(non-curse) enchantment whose level scales with the rank.")
-                    .defineInRange("randomBooksMin", new int[]{0, 0, 1, 2}[i], 0, 20);
+                    .defineInRange("randomBooksMin", new int[]{1, 1, 1, 3}[i], 0, 20);
             bookCountMax = b.comment("Random enchanted books dropped per kill (maximum).")
-                    .defineInRange("randomBooksMax", new int[]{1, 1, 2, 3}[i], 0, 20);
+                    .defineInRange("randomBooksMax", new int[]{1, 2, 3, 4}[i], 0, 20);
             bookLevelMult = b.comment("Top level of a random book = vanilla max level x this (rounded, min 1). Enchantments whose max is 1 stay level 1.",
                     "Defaults: Veteran 0.35 (Looting 1), Elite 0.7, Mythic 1.0 (vanilla max), Apex 2.5 (Protection 10).",
                     "Set to 1.0 or lower for Apex if you never want books above the vanilla maximum.")
@@ -345,12 +345,12 @@ public final class AscensionConfig {
                         "minecraft:enchanted_book|3|1|1|looting=3", "minecraft:enchanted_book|3|1|1|power=5",
                         "minecraft:enchanted_book|3|1|1|feather_falling=4", "minecraft:enchanted_book|3|1|1|thorns=3"}};
         private static final String[][] BONUS_LOOT = {
-                {"minecraft:iron_ingot|0.20|1|1"},
-                {"minecraft:diamond|0.06|1|1", "minecraft:emerald|0.20|1|1", "minecraft:golden_apple|0.04|1|1"},
-                {"minecraft:netherite_scrap|0.06|1|1", "minecraft:golden_apple|0.10|1|1",
-                        "minecraft:ender_pearl|0.20|1|1"},
-                {"minecraft:beacon|0.05|1|1", "minecraft:nether_star|0.06|1|1", "minecraft:elytra|0.01|1|1",
-                        "minecraft:totem_of_undying|0.30|1|1", "minecraft:enchanted_book|0.35|1|1|unbreaking=3",
-                        "minecraft:netherite_scrap|0.30|1|3", "minecraft:diamond_block|0.25|1|2"}};
+                {"minecraft:iron_ingot|0.35|1|2"},
+                {"minecraft:diamond|0.15|1|1", "minecraft:emerald|0.35|1|1", "minecraft:golden_apple|0.10|1|1"},
+                {"minecraft:netherite_scrap|0.12|1|1", "minecraft:golden_apple|0.20|1|1",
+                        "minecraft:ender_pearl|0.35|1|1"},
+                {"minecraft:beacon|0.10|1|1", "minecraft:nether_star|0.12|1|1", "minecraft:elytra|0.01|1|1",
+                        "minecraft:totem_of_undying|0.45|1|1", "minecraft:enchanted_book|0.50|1|1|unbreaking=3",
+                        "minecraft:netherite_scrap|0.45|1|3", "minecraft:diamond_block|0.40|1|2"}};
     }
 }
