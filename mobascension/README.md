@@ -44,9 +44,9 @@ Rewards grow with rank. A champion kill by a player gives:
 * **Reward rolls:** Veteran, Elite and Mythic always get 1 roll from a weighted pool; Apex gets none (its guaranteed loot is its reward).
 * **Bonus loot:** Veteran iron 20%; Elite diamond 6%, emerald 20%, golden apple 4%; Mythic netherite scrap 6%, golden apple 10%, ender pearl 20%; Apex beacon 2%, nether star 2%, elytra 1%.
 * **Mob head:** `headDropChance` Elite 1%, Mythic 2%, Apex 5%, for mobs that have a head (zombie, skeleton, wither skeleton, creeper, piglin).
-* **Apex armor:** a netherite set limited to 2 netherite pieces (`maxNetheritePieces`), the other 2 are diamond. Protection-type enchantments roll level 2-3.
+* **Apex armor:** a full netherite set. Protection-type enchantments are level 2.
 * **Enchant caps:** armor Veteran 1, Elite 2, Mythic 2, Apex 3; weapons Veteran 1, Elite 2, Mythic 3, Apex 5 (Apex Sharpness-type enchantments roll 3-5).
-* **Experience levels:** Veteran 1-3, Elite 2-5, Mythic 5-8, Apex 15-20, plus normal XP orbs at 0.35x / 0.4x / 0.5x / 0.6x.
+* **Experience levels:** Veteran 1-3, Elite 2-5, Mythic 5-8, Apex 18-25, plus normal XP orbs at 0.35x / 0.4x / 0.5x / 0.6x.
 
 Minions created by Splitting drop nothing by default.
 

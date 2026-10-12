@@ -137,7 +137,7 @@ public final class AscensionConfig {
         public final ModConfigSpec.BooleanValue announce, fireworks;
 
         public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance, headChance;
-        public final ModConfigSpec.IntValue maxNetheritePieces, enchantCount, maxEnchantLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
+        public final ModConfigSpec.IntValue enchantCount, maxEnchantLevel, maxProtectionLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
                 rewardRollsMin, rewardRollsMax;
         public final EnumMap<EquipmentSlot, ModConfigSpec.ConfigValue<List<? extends String>>> gear =
                 new EnumMap<>(EquipmentSlot.class);
@@ -207,8 +207,6 @@ public final class AscensionConfig {
             gear.put(EquipmentSlot.LEGS, list(b, "leggings", GEAR_LEGS[i]));
             gear.put(EquipmentSlot.FEET, list(b, "boots", GEAR_FEET[i]));
             gear.put(EquipmentSlot.MAINHAND, list(b, "weapons", GEAR_WEAPON[i]));
-            maxNetheritePieces = b.comment("Most netherite armor pieces a champion of this rank wears. Extra netherite pieces become diamond.")
-                    .defineInRange("maxNetheritePieces", new int[]{4, 4, 4, 2}[i], 0, 4);
             trim = b.comment("Chance per armor piece to have a random VANILLA armor trim.")
                     .defineInRange("armorTrimChance", new double[]{0.10, 0.25, 0.50, 0.80}[i], 0.0, 1.0);
             enchantChance = b.comment("Chance per gear piece to be enchanted (plain vanilla enchantments).")
@@ -217,6 +215,8 @@ public final class AscensionConfig {
                     .defineInRange("enchantCount", new int[]{1, 2, 3, 4}[i], 0, 8);
             maxEnchantLevel = b.comment("Highest enchantment level on ARMOR (also never above the vanilla max for that enchantment).")
                     .defineInRange("maxEnchantLevel", new int[]{1, 2, 2, 3}[i], 1, 5);
+            maxProtectionLevel = b.comment("Highest level of the Protection-type armor enchantments (Protection, Fire, Blast, Projectile).")
+                    .defineInRange("maxProtectionLevel", new int[]{1, 2, 2, 2}[i], 1, 4);
             weaponEnchantLevel = b.comment("Highest enchantment level on WEAPONS (also never above the vanilla max for that enchantment).")
                     .defineInRange("weaponEnchantLevel", new int[]{1, 2, 3, 5}[i], 1, 5);
             gearDropsMin = b.comment("Gear pieces dropped on a player kill, minimum. A drop is never two weapons: it is armor and/or one weapon.")
@@ -234,9 +234,9 @@ public final class AscensionConfig {
             b.pop();
 
             killLevels = b.comment("Minimum experience LEVELS given directly to the player who kills this rank.")
-                    .defineInRange("killLevels", new int[]{1, 2, 5, 15}[i], 0, 1000);
+                    .defineInRange("killLevels", new int[]{1, 2, 5, 18}[i], 0, 1000);
             killLevelsMax = b.comment("Maximum experience LEVELS given to the killer (a random amount between min and max).")
-                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 20}[i], 0, 1000);
+                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 25}[i], 0, 1000);
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")

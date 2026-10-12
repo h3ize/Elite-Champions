@@ -60,8 +60,8 @@ public final class GearEnchanter {
             if (!compatible) continue;
 
             int hi = Math.max(1, Math.min(h.value().getMaxLevel(), cap));
+            if (!weapon && PROTECTIONS.contains(key)) hi = Math.min(hi, cfg.maxProtectionLevel.get());
             int lo = hi;
-            if (!weapon && PROTECTIONS.contains(key) && hi >= 3) lo = hi - 1;
             if (weapon && DAMAGE.contains(key) && hi >= 4) lo = hi - 2;
             int level = lo + random.nextInt(hi - lo + 1);
             stack.enchant(h, level);

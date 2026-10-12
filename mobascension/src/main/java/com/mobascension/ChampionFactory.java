@@ -133,7 +133,6 @@ public final class ChampionFactory {
         if (random.nextDouble() < cfg.oozing.get()) infinite(mob, MobEffects.OOZING);
         if (rank == Rank.APEX) {
             infinite(mob, MobEffects.DAMAGE_BOOST, 1);
-            infinite(mob, MobEffects.DAMAGE_RESISTANCE, 0);
             List<Holder<net.minecraft.world.effect.MobEffect>> extras = new ArrayList<>(List.of(
                     MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.FIRE_RESISTANCE, MobEffects.WATER_BREATHING,
                     MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED, MobEffects.ABSORPTION));
@@ -238,7 +237,6 @@ public final class ChampionFactory {
             giveGear(mob, level, rank, cfg, slot, random);
         }
 
-        limitNetherite(mob, level, rank, cfg, random);
 
         if (!(mob instanceof RangedAttackMob) && random.nextDouble() < cfg.gearChance.get()) {
             ItemStack current = mob.getMainHandItem();
@@ -274,37 +272,6 @@ public final class ChampionFactory {
         }
         if (random.nextDouble() < cfg.enchantChance.get()) {
             GearEnchanter.enchant(stack, rank, slot == EquipmentSlot.MAINHAND, level.registryAccess(), random);
-        }
-    }
-
-    private static boolean isNetherite(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("netherite_");
-    }
-
-    private static Item diamondFor(EquipmentSlot slot) {
-        return switch (slot) {
-            case HEAD -> Items.DIAMOND_HELMET;
-            case CHEST -> Items.DIAMOND_CHESTPLATE;
-            case LEGS -> Items.DIAMOND_LEGGINGS;
-            default -> Items.DIAMOND_BOOTS;
-        };
-    }
-
-    private static void limitNetherite(Mob mob, ServerLevel level, Rank rank, AscensionConfig.RankSettings cfg, RandomSource random) {
-        List<EquipmentSlot> netherite = new ArrayList<>();
-        for (EquipmentSlot slot : ARMOR_SLOTS) {
-            if (isNetherite(mob.getItemBySlot(slot))) netherite.add(slot);
-        }
-        int max = cfg.maxNetheritePieces.get();
-        if (netherite.size() <= max) return;
-        Collections.shuffle(netherite, new Random(random.nextLong()));
-        for (int i = max; i < netherite.size(); i++) {
-            EquipmentSlot slot = netherite.get(i);
-            ItemStack stack = new ItemStack(diamondFor(slot));
-            finishGear(stack, level, rank, slot, random);
-            CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(GEAR_TAG, true));
-            mob.setItemSlot(slot, stack);
-            mob.setDropChance(slot, 0.0F);
         }
     }
 
