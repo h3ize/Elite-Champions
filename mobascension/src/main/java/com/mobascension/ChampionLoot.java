@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,6 +16,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +67,8 @@ public final class ChampionLoot {
             }
         }
 
+        out.addAll(randomBooks(level, rank, random));
+
         for (String line : cfg.bonusLoot.get()) {
             Entry e = Entry.parse(line);
             if (e == null) continue;
@@ -71,6 +76,40 @@ public final class ChampionLoot {
                 ItemStack stack = e.create(access, random);
                 if (!stack.isEmpty()) out.add(stack);
             }
+        }
+        return out;
+    }
+
+    /**
+     * Random enchanted books: a different random positive (non-curse) enchantment per book.
+     * The top level is vanilla max x the rank's multiplier; the roll is anywhere between the rank's minimum fraction
+     * and that top, so higher ranks give better books without always giving the best one.
+     */
+    public static List<ItemStack> randomBooks(ServerLevel level, Rank rank, RandomSource random) {
+        AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
+        int min = cfg.bookCountMin.get();
+        int max = Math.max(min, cfg.bookCountMax.get());
+        int count = min + random.nextInt(max - min + 1);
+        List<ItemStack> out = new ArrayList<>();
+        if (count <= 0) return out;
+
+        Registry<Enchantment> registry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        List<Holder.Reference<Enchantment>> pool = registry.holders()
+                .filter(h -> !h.is(EnchantmentTags.CURSE))
+                .collect(Collectors.toCollection(ArrayList::new));
+        Collections.shuffle(pool, new java.util.Random(random.nextLong()));
+
+        double mult = cfg.bookLevelMult.get();
+        double frac = cfg.bookMinFraction.get();
+        for (int i = 0; i < count && i < pool.size(); i++) {
+            Holder<Enchantment> h = pool.get(i);
+            int vanillaMax = h.value().getMaxLevel();
+            int top = vanillaMax <= 1 ? 1 : Math.max(1, (int) Math.round(vanillaMax * mult));
+            int low = Math.max(1, Math.min(top, (int) Math.ceil(top * frac)));
+            int lvl = low + random.nextInt(top - low + 1);
+            ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
+            book.enchant(h, lvl);
+            out.add(book);
         }
         return out;
     }

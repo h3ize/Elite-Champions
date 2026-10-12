@@ -127,7 +127,7 @@ public final class AscensionConfig {
         public final ModConfigSpec.ConfigValue<String> displayName;
 
         public final ModConfigSpec.DoubleValue health, armor, toughness, speed, damage, knockback,
-                fall, size, xp;
+                fall, size, xp, bookLevelMult, bookMinFraction;
 
         public final ModConfigSpec.IntValue abilityCount;
         public final ModConfigSpec.DoubleValue weaving, infested, oozing;
@@ -138,7 +138,7 @@ public final class AscensionConfig {
 
         public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance;
         public final ModConfigSpec.IntValue enchantCount, maxEnchantLevel, maxProtectionLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
-                rewardRollsMin, rewardRollsMax;
+                rewardRollsMin, rewardRollsMax, bookCountMin, bookCountMax;
         public final EnumMap<EquipmentSlot, ModConfigSpec.ConfigValue<List<? extends String>>> gear =
                 new EnumMap<>(EquipmentSlot.class);
         public final ModConfigSpec.ConfigValue<List<? extends String>> bonusLoot, guaranteedLoot, rewardPool;
@@ -176,7 +176,7 @@ public final class AscensionConfig {
             size = b.comment("Extra body size as a fraction at level 5 (0.2 = 20% bigger).")
                     .defineInRange("sizeBonus", new double[]{0.0, 0.05, 0.10, 0.20}[i], 0.0, 2.0);
             xp = b.comment("Experience drop multiplier.")
-                    .defineInRange("xpMultiplier", new double[]{0.35, 0.4, 0.5, 0.6}[i], 0.0, 1000.0);
+                    .defineInRange("xpMultiplier", new double[]{0.35, 0.4, 0.5, 1.5}[i], 0.0, 1000.0);
             b.pop();
 
             b.push("effects");
@@ -238,9 +238,21 @@ public final class AscensionConfig {
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 2}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 3}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 4}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 5}[i], 0, 64);
+            bookCountMin = b.comment("Random enchanted books dropped per kill (minimum). Each is a different random positive",
+                    "(non-curse) enchantment whose level scales with the rank.")
+                    .defineInRange("randomBooksMin", new int[]{0, 0, 1, 2}[i], 0, 20);
+            bookCountMax = b.comment("Random enchanted books dropped per kill (maximum).")
+                    .defineInRange("randomBooksMax", new int[]{1, 1, 2, 3}[i], 0, 20);
+            bookLevelMult = b.comment("Top level of a random book = vanilla max level x this (rounded, min 1). Enchantments whose max is 1 stay level 1.",
+                    "Defaults: Veteran 0.35 (Looting 1), Elite 0.7, Mythic 1.0 (vanilla max), Apex 2.5 (Protection 10).",
+                    "Set to 1.0 or lower for Apex if you never want books above the vanilla maximum.")
+                    .defineInRange("bookLevelMultiplier", new double[]{0.35, 0.7, 1.0, 2.5}[i], 0.0, 100.0);
+            bookMinFraction = b.comment("Lowest level a random book can roll, as a fraction of its top level (0.4 = 40%).",
+                    "The level is random between that and the top, so higher ranks are better but not always maxed.")
+                    .defineInRange("bookMinLevelFraction", new double[]{0.4, 0.4, 0.4, 0.4}[i], 0.0, 1.0);
             rewardPool = b.comment("Weighted pool the guaranteed rolls pick from.",
                     "Format: item_id|weight|min|max  or  item_id|weight|min|max|enchant=level,enchant=level",
                     "Example: minecraft:shield|5|1|1|unbreaking=3,mending=1  (levels are capped at the vanilla max)")
@@ -296,12 +308,18 @@ public final class AscensionConfig {
                 {"minecraft:experience_bottle|1.0|2|4",
                         "minecraft:diamond|1.0|2|3",
                         "minecraft:golden_apple|1.0|1|1"},
-                {"minecraft:diamond|1.0|6|12",
+                {"minecraft:diamond|1.0|8|14",
                         "minecraft:netherite_ingot|1.0|2|2",
+                        "minecraft:netherite_scrap|1.0|1|2",
+                        "minecraft:diamond_block|1.0|1|2",
+                        "minecraft:ender_pearl|1.0|2|4",
+                        "minecraft:enchanted_book|1.0|1|1|mending=1",
                         "minecraft:enchanted_golden_apple|1.0|2|3",
                         "minecraft:golden_apple|1.0|4|6",
-                        "minecraft:emerald|1.0|8|16",
-                        "minecraft:experience_bottle|1.0|6|12"}};
+                        "minecraft:emerald|1.0|10|18",
+                        "minecraft:experience_bottle|1.0|8|14",
+                        "minecraft:lapis_lazuli|1.0|8|16",
+                        "minecraft:gold_ingot|1.0|4|8"}};
         private static final String[][] REWARD_POOL = {
                 {"minecraft:iron_ingot|12|1|2", "minecraft:gold_ingot|8|1|1", "minecraft:emerald|6|1|1",
                         "minecraft:cooked_beef|10|2|4",
@@ -332,7 +350,7 @@ public final class AscensionConfig {
                 {"minecraft:netherite_scrap|0.06|1|1", "minecraft:golden_apple|0.10|1|1",
                         "minecraft:ender_pearl|0.20|1|1"},
                 {"minecraft:beacon|0.05|1|1", "minecraft:nether_star|0.06|1|1", "minecraft:elytra|0.01|1|1",
-                        "minecraft:totem_of_undying|0.15|1|1", "minecraft:enchanted_book|0.20|1|1|mending=1",
-                        "minecraft:netherite_scrap|0.30|1|3"}};
+                        "minecraft:totem_of_undying|0.30|1|1", "minecraft:enchanted_book|0.35|1|1|unbreaking=3",
+                        "minecraft:netherite_scrap|0.30|1|3", "minecraft:diamond_block|0.25|1|2"}};
     }
 }

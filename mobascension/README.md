@@ -40,12 +40,14 @@ Rewards grow with rank. A champion kill by a player gives:
   * Veteran: 1-2 experience bottles
   * Elite: 2-3 experience bottles, 1 diamond
   * Mythic: 2-4 experience bottles, 2-3 diamonds, 1 golden apple
-  * **Apex: 6-12 diamonds, 2 netherite ingots, 2-3 enchanted golden apples, 4-6 golden apples, 8-16 emeralds, 6-12 experience bottles**
-* **Reward rolls:** Veteran, Elite and Mythic always get 1 roll from a weighted pool; Apex gets 2-4 rolls from its own pool (totems, enchanted books, shields, netherite scrap, netherite gear, golden apples).
-* **Bonus loot:** Veteran iron 20%; Elite diamond 6%, emerald 20%, golden apple 4%; Mythic netherite scrap 6%, golden apple 10%, ender pearl 20%; Apex beacon 5%, nether star 6%, elytra 1%, totem of undying 15%, Mending book 20%, netherite scrap 30%.
+  * **Apex: 8-14 diamonds, 1-2 diamond blocks, 2 netherite ingots, 1-2 netherite scrap, 2-4 ender pearls, a Mending book, 2-3 enchanted golden apples, 4-6 golden apples, 10-18 emeralds, 8-14 experience bottles, 8-16 lapis, 4-8 gold ingots**
+* **Random enchanted books:** every kill can drop different random positive (non-curse) enchantment books whose level scales with rank: Veteran 0-1 (top level about 1/3 of vanilla max, e.g. Looting I), Elite 0-1 (about 70%), Mythic 1-2 (up to vanilla max), **Apex 2-3 (up to 2.5x vanilla max, e.g. Protection X)**. The level is random between 40% of that top and the top, so higher ranks are better but not always maxed. Configurable with `randomBooksMin/Max`, `bookLevelMultiplier` and `bookMinLevelFraction`.
+* **Advancement:** killing an Apex earns the **Apex Slayer** goal (Adventure tab) plus 300 XP.
+* **Reward rolls:** Veteran, Elite and Mythic always get 1 roll from a weighted pool; Apex gets 3-5 rolls from its own pool (totems, enchanted books, shields, netherite scrap, netherite gear, golden apples).
+* **Bonus loot:** Veteran iron 20%; Elite diamond 6%, emerald 20%, golden apple 4%; Mythic netherite scrap 6%, golden apple 10%, ender pearl 20%; Apex beacon 5%, nether star 6%, elytra 1%, totem of undying 30%, Unbreaking III book 35%, netherite scrap 30%, diamond blocks 25%.
 * **Apex armor:** a full netherite set. Protection-type enchantments are level 2.
 * **Enchant caps:** armor Veteran 1, Elite 2, Mythic 2, Apex 3; weapons Veteran 1, Elite 2, Mythic 3, Apex 5 (Apex Sharpness-type enchantments roll 3-5).
-* **Experience levels:** Veteran 1-3, Elite 2-5, Mythic 5-8, Apex 20-28, plus normal XP orbs at 0.35x / 0.4x / 0.5x / 0.6x.
+* **Experience levels:** Veteran 1-3, Elite 2-5, Mythic 5-8, Apex 20-28, plus normal XP orbs at 0.35x / 0.4x / 0.5x / 1.5x.
 
 Minions created by Splitting drop nothing by default.
 

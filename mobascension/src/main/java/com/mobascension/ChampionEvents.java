@@ -1,6 +1,7 @@
 package com.mobascension;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.advancements.AdvancementHolder;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
@@ -116,6 +117,10 @@ public class ChampionEvents {
             int lvMax = Math.max(lvMin, AscensionConfig.rank(rank).killLevelsMax.get());
             int levels = lvMin + mob.getRandom().nextInt(lvMax - lvMin + 1);
             if (levels > 0) killer.giveExperienceLevels(levels);
+            if (rank == Rank.APEX) {
+                AdvancementHolder goal = level.getServer().getAdvancements().get(ChampionFactory.id("apex_slayer"));
+                if (goal != null) killer.getAdvancements().award(goal, "apex_kill");
+            }
         }
 
         if (AscensionConfig.rank(rank).fireworks.get() && mob.getKillCredit() instanceof Player) {
