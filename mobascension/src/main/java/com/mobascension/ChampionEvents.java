@@ -201,9 +201,6 @@ public class ChampionEvents {
         for (ItemStack reward : ChampionLoot.roll(level, rank, random)) {
             drop(event, mob, reward);
         }
-
-        ItemStack head = ChampionLoot.head(mob, rank, random);
-        if (!head.isEmpty()) drop(event, mob, head);
     }
 
     /** Strips marker data and damages the item randomly (5%-85% durability used). */

@@ -57,7 +57,7 @@ public final class AscensionConfig {
                         List.of("SPAWNER", "TRIAL_SPAWNER", "BREEDING", "BUCKET", "CONVERSION"),
                         () -> "SPAWNER", o -> o instanceof String);
         COMMON_WEIGHT = b.comment("Spawn weight of normal (non-champion) mobs. Compare against the rank weights.",
-                "Defaults give about 93.6% normal, 3.7% Veteran, 1.9% Elite, 0.66% Mythic, 0.14% Apex.")
+                "Defaults give about 94.9% normal, 3.8% Veteran, 0.95% Elite, 0.33% Mythic, 0.07% Apex.")
                 .defineInRange("normalWeight", 100.0, 0.0, 100000.0);
         REPLACE_VANILLA_GEAR = b.comment("Replace armor/weapons mobs spawned with by vanilla.")
                 .define("replaceVanillaGear", true);
@@ -136,7 +136,7 @@ public final class AscensionConfig {
         public final ModConfigSpec.IntValue glowSeconds;
         public final ModConfigSpec.BooleanValue announce, fireworks;
 
-        public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance, headChance;
+        public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance;
         public final ModConfigSpec.IntValue enchantCount, maxEnchantLevel, maxProtectionLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
                 rewardRollsMin, rewardRollsMax;
         public final EnumMap<EquipmentSlot, ModConfigSpec.ConfigValue<List<? extends String>>> gear =
@@ -148,7 +148,7 @@ public final class AscensionConfig {
             b.push(rank.id);
 
             weight = b.comment("Relative spawn weight of this rank (0 disables the rank).")
-                    .defineInRange("weight", new double[]{4.0, 2.0, 0.7, 0.15}[i], 0.0, 100000.0);
+                    .defineInRange("weight", new double[]{4.0, 1.0, 0.35, 0.07}[i], 0.0, 100000.0);
             displayName = b.define("displayName", rank.defaultName);
 
             b.push("stats");
@@ -190,7 +190,7 @@ public final class AscensionConfig {
             oozing = b.comment("Chance to spawn Oozing (infinite).")
                     .defineInRange("oozingChance", new double[]{0.05, 0.10, 0.20, 0.35}[i], 0.0, 1.0);
             glowSeconds = b.comment("Seconds of Glowing when spawned (outline is coloured by rank). 0 = none, -1 = permanent.")
-                    .defineInRange("glowSecondsOnSpawn", new int[]{8, 8, 8, 8}[i], -1, 3600);
+                    .defineInRange("glowSecondsOnSpawn", new int[]{0, 0, 0, 8}[i], -1, 3600);
             announce = b.comment("Tell nearby players when this rank spawns.")
                     .define("announceSpawn", i == 3);
             fireworks = b.comment("Celebratory fireworks when a player defeats this rank.")
@@ -232,17 +232,15 @@ public final class AscensionConfig {
             b.pop();
 
             killLevels = b.comment("Minimum experience LEVELS given directly to the player who kills this rank.")
-                    .defineInRange("killLevels", new int[]{1, 2, 5, 18}[i], 0, 1000);
+                    .defineInRange("killLevels", new int[]{1, 2, 5, 20}[i], 0, 1000);
             killLevelsMax = b.comment("Maximum experience LEVELS given to the killer (a random amount between min and max).")
-                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 25}[i], 0, 1000);
+                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 28}[i], 0, 1000);
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 1}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 2}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 2}[i], 0, 64);
-            headChance = b.comment("Chance to drop the champion's own head (only zombie, skeleton, wither skeleton, creeper and piglin have one).")
-                    .defineInRange("headDropChance", new double[]{0.0, 0.01, 0.02, 0.05}[i], 0.0, 1.0);
+                    .defineInRange("rewardRollsMax", new int[]{1, 1, 1, 4}[i], 0, 64);
             rewardPool = b.comment("Weighted pool the guaranteed rolls pick from.",
                     "Format: item_id|weight|min|max  or  item_id|weight|min|max|enchant=level,enchant=level",
                     "Example: minecraft:shield|5|1|1|unbreaking=3,mending=1  (levels are capped at the vanilla max)")
@@ -298,12 +296,12 @@ public final class AscensionConfig {
                 {"minecraft:experience_bottle|1.0|2|4",
                         "minecraft:diamond|1.0|2|3",
                         "minecraft:golden_apple|1.0|1|1"},
-                {"minecraft:diamond|1.0|3|8",
+                {"minecraft:diamond|1.0|6|12",
                         "minecraft:netherite_ingot|1.0|2|2",
-                        "minecraft:enchanted_golden_apple|1.0|1|2",
-                        "minecraft:golden_apple|1.0|2|4",
-                        "minecraft:emerald|1.0|4|10",
-                        "minecraft:experience_bottle|1.0|3|8"}};
+                        "minecraft:enchanted_golden_apple|1.0|2|3",
+                        "minecraft:golden_apple|1.0|4|6",
+                        "minecraft:emerald|1.0|8|16",
+                        "minecraft:experience_bottle|1.0|6|12"}};
         private static final String[][] REWARD_POOL = {
                 {"minecraft:iron_ingot|12|1|2", "minecraft:gold_ingot|8|1|1", "minecraft:emerald|6|1|1",
                         "minecraft:cooked_beef|10|2|4",
@@ -317,7 +315,7 @@ public final class AscensionConfig {
                         "minecraft:ender_pearl|5|1|2", "minecraft:experience_bottle|6|1|3",
                         "minecraft:shield|3|1|1|unbreaking=2,mending=1",
                         "minecraft:enchanted_book|2|1|1|unbreaking=3"},
-                {"minecraft:diamond|8|1|3", "minecraft:netherite_scrap|2|1|1",
+                {"minecraft:diamond|8|2|4", "minecraft:netherite_scrap|4|1|2",
                         "minecraft:golden_apple|6|1|1", "minecraft:enchanted_golden_apple|1|1|1",
                         "minecraft:totem_of_undying|1|1|1",
                         "minecraft:shield|3|1|1|unbreaking=3,mending=1",
@@ -333,7 +331,8 @@ public final class AscensionConfig {
                 {"minecraft:diamond|0.06|1|1", "minecraft:emerald|0.20|1|1", "minecraft:golden_apple|0.04|1|1"},
                 {"minecraft:netherite_scrap|0.06|1|1", "minecraft:golden_apple|0.10|1|1",
                         "minecraft:ender_pearl|0.20|1|1"},
-                {"minecraft:beacon|0.02|1|1", "minecraft:nether_star|0.02|1|1", "minecraft:elytra|0.01|1|1",
-                        "minecraft:totem_of_undying|0.08|1|1", "minecraft:enchanted_book|0.10|1|1|mending=1"}};
+                {"minecraft:beacon|0.05|1|1", "minecraft:nether_star|0.06|1|1", "minecraft:elytra|0.01|1|1",
+                        "minecraft:totem_of_undying|0.15|1|1", "minecraft:enchanted_book|0.20|1|1|mending=1",
+                        "minecraft:netherite_scrap|0.30|1|3"}};
     }
 }

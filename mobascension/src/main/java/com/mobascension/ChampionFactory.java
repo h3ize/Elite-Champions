@@ -275,9 +275,9 @@ public final class ChampionFactory {
     /** Random trim, restricted to vanilla (minecraft:) patterns and materials. */
     private static void applyTrim(ItemStack stack, ServerLevel level, RandomSource random) {
         var patterns = level.registryAccess().registryOrThrow(Registries.TRIM_PATTERN).holders()
-                .filter(h -> h.key().location().getNamespace().equals("minecraft")).toList();
+                .filter(h -> ResourceLocation.DEFAULT_NAMESPACE.equals(h.key().location().getNamespace())).toList();
         var materials = level.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL).holders()
-                .filter(h -> h.key().location().getNamespace().equals("minecraft")).toList();
+                .filter(h -> ResourceLocation.DEFAULT_NAMESPACE.equals(h.key().location().getNamespace())).toList();
         if (patterns.isEmpty() || materials.isEmpty()) return;
         stack.set(DataComponents.TRIM, new ArmorTrim(
                 materials.get(random.nextInt(materials.size())),

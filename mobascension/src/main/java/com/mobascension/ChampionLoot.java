@@ -9,8 +9,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -75,18 +73,6 @@ public final class ChampionLoot {
             }
         }
         return out;
-    }
-
-    /** The champion's own head, rolled against the rank's headDropChance. Empty if the mob has no head item. */
-    public static ItemStack head(Mob mob, Rank rank, RandomSource random) {
-        if (random.nextDouble() >= AscensionConfig.rank(rank).headChance.get()) return ItemStack.EMPTY;
-        EntityType<?> type = mob.getType();
-        if (type == EntityType.ZOMBIE) return new ItemStack(Items.ZOMBIE_HEAD);
-        if (type == EntityType.SKELETON) return new ItemStack(Items.SKELETON_SKULL);
-        if (type == EntityType.WITHER_SKELETON) return new ItemStack(Items.WITHER_SKELETON_SKULL);
-        if (type == EntityType.CREEPER) return new ItemStack(Items.CREEPER_HEAD);
-        if (type == EntityType.PIGLIN) return new ItemStack(Items.PIGLIN_HEAD);
-        return ItemStack.EMPTY;
     }
 
     /** Apex weapon drop alternative: a bow with Power 5 (sometimes 6), Unbreaking 3 and Mending. */
