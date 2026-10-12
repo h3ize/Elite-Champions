@@ -127,7 +127,7 @@ public final class AscensionConfig {
         public final ModConfigSpec.ConfigValue<String> displayName;
 
         public final ModConfigSpec.DoubleValue health, armor, toughness, speed, damage, knockback,
-                fall, size, xp, bookLevelMult, bookMinFraction;
+                fall, size, xp, bookLevelMult, bookMinFraction, toolMaxLevelChance, toolMinFraction;
 
         public final ModConfigSpec.IntValue abilityCount;
         public final ModConfigSpec.DoubleValue weaving, infested, oozing;
@@ -138,10 +138,11 @@ public final class AscensionConfig {
 
         public final ModConfigSpec.DoubleValue gearChance, trim, enchantChance, rangedChance;
         public final ModConfigSpec.IntValue enchantCount, maxEnchantLevel, maxProtectionLevel, weaponEnchantLevel, gearDropsMin, gearDropsMax, killLevels, killLevelsMax, rangedCooldown,
-                rewardRollsMin, rewardRollsMax, bookCountMin, bookCountMax;
+                rewardRollsMin, rewardRollsMax, bookCountMin, bookCountMax,
+                toolDropsMin, toolDropsMax, toolEnchantMin, toolEnchantMax, toolTopLevel;
         public final EnumMap<EquipmentSlot, ModConfigSpec.ConfigValue<List<? extends String>>> gear =
                 new EnumMap<>(EquipmentSlot.class);
-        public final ModConfigSpec.ConfigValue<List<? extends String>> bonusLoot, guaranteedLoot, rewardPool;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> bonusLoot, guaranteedLoot, rewardPool, toolDrops;
 
         RankSettings(ModConfigSpec.Builder b, Rank rank) {
             int i = rank.ordinal();
@@ -238,14 +239,14 @@ public final class AscensionConfig {
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 2, 3}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 2, 4}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 2, 3, 5}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 2, 3, 6}[i], 0, 64);
             bookCountMin = b.comment("Random enchanted books dropped per kill (minimum). Each is a different random positive",
                     "(non-curse) enchantment whose level scales with the rank.")
-                    .defineInRange("randomBooksMin", new int[]{1, 1, 1, 3}[i], 0, 20);
+                    .defineInRange("randomBooksMin", new int[]{1, 1, 1, 4}[i], 0, 20);
             bookCountMax = b.comment("Random enchanted books dropped per kill (maximum).")
-                    .defineInRange("randomBooksMax", new int[]{1, 2, 3, 4}[i], 0, 20);
+                    .defineInRange("randomBooksMax", new int[]{1, 2, 3, 5}[i], 0, 20);
             bookLevelMult = b.comment("Top level of a random book = vanilla max level x this (rounded, min 1). Enchantments whose max is 1 stay level 1.",
                     "Defaults: Veteran 0.35 (Looting 1), Elite 0.7, Mythic 1.0 (vanilla max), Apex 2.5 (Protection 10).",
                     "Set to 1.0 or lower for Apex if you never want books above the vanilla maximum.")
@@ -253,6 +254,27 @@ public final class AscensionConfig {
             bookMinFraction = b.comment("Lowest level a random book can roll, as a fraction of its top level (0.4 = 40%).",
                     "The level is random between that and the top, so higher ranks are better but not always maxed.")
                     .defineInRange("bookMinLevelFraction", new double[]{0.4, 0.4, 0.4, 0.4}[i], 0.0, 1.0);
+            toolDrops = b.comment("Items that can drop as random enchanted tools/weapons (one is picked at random per drop).",
+                    "Leave empty to disable. Enchantments are random, positive only and always compatible with each other and the item.")
+                    .defineListAllowEmpty("toolDrops", java.util.Arrays.asList(TOOL_DROPS[i]),
+                            () -> "minecraft:netherite_pickaxe", o -> o instanceof String);
+            toolDropsMin = b.comment("Random enchanted tools dropped per kill (minimum).")
+                    .defineInRange("toolDropsMin", new int[]{0, 0, 0, 1}[i], 0, 20);
+            toolDropsMax = b.comment("Random enchanted tools dropped per kill (maximum).")
+                    .defineInRange("toolDropsMax", new int[]{0, 0, 0, 3}[i], 0, 20);
+            toolEnchantMin = b.comment("How many enchantments each dropped tool tries to get (minimum, limited by what is compatible).")
+                    .defineInRange("toolEnchantMin", new int[]{1, 1, 1, 4}[i], 0, 30);
+            toolEnchantMax = b.comment("How many enchantments each dropped tool tries to get (maximum).")
+                    .defineInRange("toolEnchantMax", new int[]{1, 1, 1, 7}[i], 0, 30);
+            toolTopLevel = b.comment("Top level for enchantments that have more than one level (Efficiency, Fortune, Sharpness...).",
+                    "It is always at least the vanilla max of that enchantment, so 10 gives Fortune 10 / Efficiency 10.",
+                    "Single-level enchantments (Mending, Silk Touch...) stay level 1. 0 = never above the vanilla max.")
+                    .defineInRange("toolTopLevel", new int[]{0, 0, 0, 10}[i], 0, 255);
+            toolMaxLevelChance = b.comment("Chance that an enchantment on a dropped tool rolls exactly its top level.",
+                    "Otherwise it rolls between toolMinLevelFraction x top and the top.")
+                    .defineInRange("toolMaxLevelChance", new double[]{0.25, 0.25, 0.25, 0.25}[i], 0.0, 1.0);
+            toolMinFraction = b.comment("Lowest level a tool enchantment can roll, as a fraction of its top level.")
+                    .defineInRange("toolMinLevelFraction", new double[]{0.4, 0.4, 0.4, 0.4}[i], 0.0, 1.0);
             rewardPool = b.comment("Weighted pool the guaranteed rolls pick from.",
                     "Format: item_id|weight|min|max  or  item_id|weight|min|max|enchant=level,enchant=level",
                     "Example: minecraft:shield|5|1|1|unbreaking=3,mending=1  (levels are capped at the vanilla max)")
@@ -301,6 +323,11 @@ public final class AscensionConfig {
                 {"minecraft:iron_sword", "minecraft:iron_axe"},
                 {"minecraft:diamond_sword", "minecraft:diamond_axe"},
                 {"minecraft:netherite_sword", "minecraft:netherite_axe"}};
+        private static final String[][] TOOL_DROPS = {
+                {}, {}, {},
+                {"minecraft:netherite_pickaxe", "minecraft:netherite_axe", "minecraft:netherite_shovel",
+                        "minecraft:netherite_hoe", "minecraft:netherite_sword", "minecraft:mace",
+                        "minecraft:trident", "minecraft:bow", "minecraft:crossbow"}};
         private static final String[][] GUARANTEED_LOOT = {
                 {"minecraft:experience_bottle|1.0|1|2"},
                 {"minecraft:experience_bottle|1.0|2|3",

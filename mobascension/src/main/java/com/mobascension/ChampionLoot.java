@@ -68,6 +68,7 @@ public final class ChampionLoot {
         }
 
         out.addAll(randomBooks(level, rank, random));
+        out.addAll(randomTools(level, rank, random));
 
         for (String line : cfg.bonusLoot.get()) {
             Entry e = Entry.parse(line);
@@ -112,6 +113,64 @@ public final class ChampionLoot {
             out.add(book);
         }
         return out;
+    }
+
+    /**
+     * Random enchanted tools and weapons from the rank's toolDrops list. Each gets random positive enchantments that are
+     * compatible with the item and each other. Multi-level enchantments roll up to max(vanilla max, toolTopLevel),
+     * and sometimes roll exactly that top level.
+     */
+    public static List<ItemStack> randomTools(ServerLevel level, Rank rank, RandomSource random) {
+        AscensionConfig.RankSettings cfg = AscensionConfig.rank(rank);
+        int min = cfg.toolDropsMin.get();
+        int max = Math.max(min, cfg.toolDropsMax.get());
+        int count = min + random.nextInt(max - min + 1);
+        List<ItemStack> out = new ArrayList<>();
+        if (count <= 0) return out;
+
+        List<Item> items = new ArrayList<>();
+        for (String line : cfg.toolDrops.get()) {
+            ResourceLocation id = ResourceLocation.tryParse(line.trim());
+            if (id == null) continue;
+            Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(Items.AIR);
+            if (item != Items.AIR) items.add(item);
+        }
+        if (items.isEmpty()) return out;
+
+        Registry<Enchantment> registry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        List<Holder.Reference<Enchantment>> all = registry.holders()
+                .filter(h -> !h.is(EnchantmentTags.CURSE))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        int enchMin = cfg.toolEnchantMin.get();
+        int enchMax = Math.max(enchMin, cfg.toolEnchantMax.get());
+        for (int i = 0; i < count; i++) {
+            ItemStack stack = new ItemStack(items.get(random.nextInt(items.size())));
+            List<Holder.Reference<Enchantment>> shuffled = new ArrayList<>(all);
+            Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
+            int want = enchMin + random.nextInt(enchMax - enchMin + 1);
+            List<Holder<Enchantment>> applied = new ArrayList<>();
+            for (Holder.Reference<Enchantment> h : shuffled) {
+                if (applied.size() >= want) break;
+                if (!h.value().canEnchant(stack)) continue;
+                boolean compatible = true;
+                for (Holder<Enchantment> other : applied) {
+                    if (!Enchantment.areCompatible(h, other)) { compatible = false; break; }
+                }
+                if (!compatible) continue;
+                stack.enchant(h, toolLevel(h.value().getMaxLevel(), cfg, random));
+                applied.add(h);
+            }
+            out.add(stack);
+        }
+        return out;
+    }
+
+    private static int toolLevel(int vanillaMax, AscensionConfig.RankSettings cfg, RandomSource random) {
+        int top = vanillaMax <= 1 ? 1 : Math.max(vanillaMax, cfg.toolTopLevel.get());
+        if (random.nextDouble() < cfg.toolMaxLevelChance.get()) return top;
+        int low = Math.max(1, Math.min(top, (int) Math.ceil(top * cfg.toolMinFraction.get())));
+        return low + random.nextInt(top - low + 1);
     }
 
     /** Apex weapon drop alternative: a bow with Power 5 (sometimes 6), Unbreaking 3 and Mending. */
