@@ -102,9 +102,9 @@ public final class ChampionFactory {
 
         int maxLevel = Math.max(1, cfg.statLevel.get());
         int minLevel = Math.max(1, Math.min(cfg.statLevelMin.get(), maxLevel));
-        int statLevel = minLevel + random.nextInt(maxLevel - minLevel + 1);
-        ChampionData.setLevel(mob, statLevel);
-        double s = statLevel / 5.0;
+        int level = minLevel + random.nextInt(maxLevel - minLevel + 1);
+        ChampionData.setLevel(mob, level);
+        double s = level / 5.0;
 
         List<Ability> abilities = rollAbilities(mob, rank, cfg);
         ChampionData.setAbilities(mob, abilities);
