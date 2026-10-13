@@ -127,7 +127,7 @@ public final class ChampionFactory {
         if (random.nextDouble() < cfg.infested.get()) infinite(mob, MobEffects.INFESTED);
         if (random.nextDouble() < cfg.oozing.get()) infinite(mob, MobEffects.OOZING);
         if (rank == Rank.APEX) {
-            infinite(mob, MobEffects.DAMAGE_BOOST, 1);
+            infinite(mob, MobEffects.DAMAGE_BOOST, 0);
             List<Holder<net.minecraft.world.effect.MobEffect>> extras = new ArrayList<>(List.of(
                     MobEffects.MOVEMENT_SPEED, MobEffects.JUMP, MobEffects.FIRE_RESISTANCE, MobEffects.WATER_BREATHING,
                     MobEffects.SLOW_FALLING, MobEffects.DIG_SPEED));

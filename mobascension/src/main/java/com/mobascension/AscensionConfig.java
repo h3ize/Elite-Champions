@@ -57,7 +57,7 @@ public final class AscensionConfig {
                         List.of("SPAWNER", "TRIAL_SPAWNER", "BREEDING", "BUCKET", "CONVERSION"),
                         () -> "SPAWNER", o -> o instanceof String);
         COMMON_WEIGHT = b.comment("Spawn weight of normal (non-champion) mobs. Compare against the rank weights.",
-                "Defaults give about 94.9% normal, 3.8% Veteran, 0.95% Elite, 0.33% Mythic, 0.07% Apex.")
+                "Defaults give about 92.4% normal, 5.5% Veteran, 1.5% Elite, 0.5% Mythic, 0.11% Apex.")
                 .defineInRange("normalWeight", 100.0, 0.0, 100000.0);
         REPLACE_VANILLA_GEAR = b.comment("Replace armor/weapons mobs spawned with by vanilla.")
                 .define("replaceVanillaGear", true);
@@ -149,35 +149,35 @@ public final class AscensionConfig {
             b.push(rank.id);
 
             weight = b.comment("Relative spawn weight of this rank (0 disables the rank).")
-                    .defineInRange("weight", new double[]{4.0, 1.0, 0.35, 0.07}[i], 0.0, 100000.0);
+                    .defineInRange("weight", new double[]{6.0, 1.6, 0.55, 0.12}[i], 0.0, 100000.0);
             displayName = b.define("displayName", rank.defaultName);
 
             b.push("stats");
             statLevelMin = b.comment("MIN stat level for this rank. Every champion rolls a random level between min and max.",
-                    "Defaults: Veteran 3, Elite 14, Mythic 7, Apex 25.")
-                    .defineInRange("statLevelMin", new int[]{3, 14, 7, 25}[i], 1, 100);
+                    "Defaults: Veteran 3, Elite 5, Mythic 7, Apex 10.")
+                    .defineInRange("statLevelMin", new int[]{3, 5, 7, 10}[i], 1, 100);
             statLevel = b.comment("MAX stat level for this rank (see statLevelMin).",
                     "Level 5 = the values below, level 10 = double, level 1 = one fifth.",
-                    "Defaults: Veteran 5, Elite 20, Mythic 13, Apex 30.")
-                    .defineInRange("statLevel", new int[]{5, 20, 13, 30}[i], 1, 100);
+                    "Defaults: Veteran 5, Elite 8, Mythic 11, Apex 14.")
+                    .defineInRange("statLevel", new int[]{5, 8, 11, 14}[i], 1, 100);
             health = b.comment("Extra max health as a fraction (1.0 = +100%) at level 5.")
-                    .defineInRange("healthBonus", new double[]{0.5, 1.0, 2.0, 4.0}[i], 0.0, 1000.0);
+                    .defineInRange("healthBonus", new double[]{0.5, 0.8, 1.5, 2.0}[i], 0.0, 1000.0);
             armor = b.comment("Extra armor points at level 5.")
-                    .defineInRange("armorBonus", new double[]{2, 4, 6, 10}[i], 0.0, 30.0);
+                    .defineInRange("armorBonus", new double[]{2, 3, 3, 2}[i], 0.0, 30.0);
             toughness = b.comment("Extra armor toughness at level 5.")
-                    .defineInRange("toughnessBonus", new double[]{0, 1, 3, 6}[i], 0.0, 20.0);
+                    .defineInRange("toughnessBonus", new double[]{0, 0.5, 1.5, 2}[i], 0.0, 20.0);
             speed = b.comment("Extra movement speed as a fraction at level 5.")
-                    .defineInRange("speedBonus", new double[]{0.05, 0.10, 0.15, 0.25}[i], 0.0, 10.0);
+                    .defineInRange("speedBonus", new double[]{0.05, 0.10, 0.12, 0.15}[i], 0.0, 10.0);
             damage = b.comment("Extra attack damage as a fraction at level 5.")
-                    .defineInRange("damageBonus", new double[]{0.35, 0.8, 1.5, 2.75}[i], 0.0, 100.0);
+                    .defineInRange("damageBonus", new double[]{0.35, 0.45, 0.7, 0.9}[i], 0.0, 100.0);
             knockback = b.comment("Knockback resistance (0-1) at level 5.")
-                    .defineInRange("knockbackResistance", new double[]{0.1, 0.25, 0.5, 0.8}[i], 0.0, 1.0);
+                    .defineInRange("knockbackResistance", new double[]{0.1, 0.2, 0.25, 0.25}[i], 0.0, 1.0);
             fall = b.comment("Extra blocks of safe fall distance at level 5.")
                     .defineInRange("safeFallBonus", new double[]{5, 10, 20, 40}[i], 0.0, 1000.0);
             size = b.comment("Extra body size as a fraction at level 5 (0.2 = 20% bigger).")
-                    .defineInRange("sizeBonus", new double[]{0.0, 0.05, 0.10, 0.20}[i], 0.0, 2.0);
+                    .defineInRange("sizeBonus", new double[]{0.0, 0.05, 0.10, 0.15}[i], 0.0, 2.0);
             xp = b.comment("Experience drop multiplier.")
-                    .defineInRange("xpMultiplier", new double[]{0.35, 0.4, 0.5, 1.5}[i], 0.0, 1000.0);
+                    .defineInRange("xpMultiplier", new double[]{0.3, 0.3, 0.4, 1.0}[i], 0.0, 1000.0);
             b.pop();
 
             b.push("effects");
@@ -200,7 +200,7 @@ public final class AscensionConfig {
 
             b.push("gear");
             gearChance = b.comment("Chance per equipment slot to receive gear (only for hostile mobs).")
-                    .defineInRange("gearChance", new double[]{0.5, 0.7, 0.9, 1.0}[i], 0.0, 1.0);
+                    .defineInRange("gearChance", new double[]{0.5, 0.6, 0.7, 0.6}[i], 0.0, 1.0);
             gear.put(EquipmentSlot.HEAD, list(b, "helmets", GEAR_HEAD[i]));
             gear.put(EquipmentSlot.CHEST, list(b, "chestplates", GEAR_CHEST[i]));
             gear.put(EquipmentSlot.LEGS, list(b, "leggings", GEAR_LEGS[i]));
@@ -209,48 +209,48 @@ public final class AscensionConfig {
             trim = b.comment("Chance per armor piece to have a random VANILLA armor trim.")
                     .defineInRange("armorTrimChance", new double[]{0.10, 0.25, 0.50, 0.80}[i], 0.0, 1.0);
             enchantChance = b.comment("Chance per gear piece to be enchanted (plain vanilla enchantments).")
-                    .defineInRange("enchantChance", new double[]{0.3, 0.5, 0.75, 1.0}[i], 0.0, 1.0);
+                    .defineInRange("enchantChance", new double[]{0.3, 0.4, 0.6, 0.8}[i], 0.0, 1.0);
             enchantCount = b.comment("How many enchantments an enchanted piece gets.")
-                    .defineInRange("enchantCount", new int[]{1, 2, 3, 4}[i], 0, 8);
+                    .defineInRange("enchantCount", new int[]{1, 1, 2, 3}[i], 0, 8);
             maxEnchantLevel = b.comment("Highest enchantment level on ARMOR (also never above the vanilla max for that enchantment).")
-                    .defineInRange("maxEnchantLevel", new int[]{1, 2, 2, 3}[i], 1, 5);
+                    .defineInRange("maxEnchantLevel", new int[]{1, 2, 2, 2}[i], 1, 5);
             maxProtectionLevel = b.comment("Highest level of the Protection-type armor enchantments (Protection, Fire, Blast, Projectile).")
                     .defineInRange("maxProtectionLevel", new int[]{1, 2, 2, 2}[i], 1, 4);
             weaponEnchantLevel = b.comment("Highest enchantment level on WEAPONS (also never above the vanilla max for that enchantment).")
-                    .defineInRange("weaponEnchantLevel", new int[]{1, 2, 3, 5}[i], 1, 5);
+                    .defineInRange("weaponEnchantLevel", new int[]{1, 2, 3, 4}[i], 1, 5);
             gearDropsMin = b.comment("Gear pieces dropped on a player kill, minimum. A drop is never two weapons: it is armor and/or one weapon.")
                     .defineInRange("gearDropsMin", new int[]{1, 1, 1, 1}[i], 0, 5);
             gearDropsMax = b.comment("Gear pieces dropped on a player kill, maximum.")
-                    .defineInRange("gearDropsMax", new int[]{1, 1, 2, 2}[i], 0, 5);
+                    .defineInRange("gearDropsMax", new int[]{1, 1, 1, 2}[i], 0, 5);
             b.pop();
 
             b.push("ranged");
             rangedChance = b.comment("Chance this champion can shoot projectiles at its target.",
                     "ONLY Apex shoots (randomly wither skulls or large fireballs). Other ranks never shoot, whatever this is set to.")
-                    .defineInRange("rangedAttackChance", new double[]{0.0, 0.0, 0.0, 0.75}[i], 0.0, 1.0);
+                    .defineInRange("rangedAttackChance", new double[]{0.0, 0.0, 0.0, 0.5}[i], 0.0, 1.0);
             rangedCooldown = b.comment("Ticks between shots (20 = 1 second).")
-                    .defineInRange("rangedCooldownTicks", new int[]{160, 120, 100, 100}[i], 5, 100000);
+                    .defineInRange("rangedCooldownTicks", new int[]{160, 120, 100, 140}[i], 5, 100000);
             b.pop();
 
             killLevels = b.comment("Minimum experience LEVELS given directly to the player who kills this rank.")
-                    .defineInRange("killLevels", new int[]{1, 2, 5, 20}[i], 0, 1000);
+                    .defineInRange("killLevels", new int[]{1, 1, 3, 10}[i], 0, 1000);
             killLevelsMax = b.comment("Maximum experience LEVELS given to the killer (a random amount between min and max).")
-                    .defineInRange("killLevelsMax", new int[]{3, 5, 8, 28}[i], 0, 1000);
+                    .defineInRange("killLevelsMax", new int[]{3, 3, 6, 16}[i], 0, 1000);
 
             b.push("rewards");
             rewardRollsMin = b.comment("Guaranteed rolls on rewardPool for EVERY kill (minimum). Each roll drops one item.")
-                    .defineInRange("rewardRollsMin", new int[]{1, 1, 2, 4}[i], 0, 64);
+                    .defineInRange("rewardRollsMin", new int[]{1, 1, 1, 2}[i], 0, 64);
             rewardRollsMax = b.comment("Guaranteed rolls on rewardPool for every kill (maximum).")
-                    .defineInRange("rewardRollsMax", new int[]{1, 2, 3, 6}[i], 0, 64);
+                    .defineInRange("rewardRollsMax", new int[]{1, 1, 2, 4}[i], 0, 64);
             bookCountMin = b.comment("Random enchanted books dropped per kill (minimum). Each is a different random positive",
                     "(non-curse) enchantment whose level scales with the rank.")
-                    .defineInRange("randomBooksMin", new int[]{1, 1, 1, 4}[i], 0, 20);
+                    .defineInRange("randomBooksMin", new int[]{1, 1, 1, 2}[i], 0, 20);
             bookCountMax = b.comment("Random enchanted books dropped per kill (maximum).")
-                    .defineInRange("randomBooksMax", new int[]{1, 2, 3, 5}[i], 0, 20);
+                    .defineInRange("randomBooksMax", new int[]{1, 1, 2, 3}[i], 0, 20);
             bookLevelMult = b.comment("Top level of a random book = vanilla max level x this (rounded, min 1). Enchantments whose max is 1 stay level 1.",
-                    "Defaults: Veteran 0.35 (Looting 1), Elite 0.7, Mythic 1.0 (vanilla max), Apex 2.5 (Protection 10).",
+                    "Defaults: Veteran 0.35 (Looting 1), Elite 0.6, Mythic 1.0 (vanilla max), Apex 1.5 (Protection 6).",
                     "Set to 1.0 or lower for Apex if you never want books above the vanilla maximum.")
-                    .defineInRange("bookLevelMultiplier", new double[]{0.35, 0.7, 1.0, 2.5}[i], 0.0, 100.0);
+                    .defineInRange("bookLevelMultiplier", new double[]{0.35, 0.6, 1.0, 1.5}[i], 0.0, 100.0);
             bookMinFraction = b.comment("Lowest level a random book can roll, as a fraction of its top level (0.4 = 40%).",
                     "The level is random between that and the top, so higher ranks are better but not always maxed.")
                     .defineInRange("bookMinLevelFraction", new double[]{0.4, 0.4, 0.4, 0.4}[i], 0.0, 1.0);
@@ -261,15 +261,15 @@ public final class AscensionConfig {
             toolDropsMin = b.comment("Random enchanted tools dropped per kill (minimum).")
                     .defineInRange("toolDropsMin", new int[]{0, 0, 0, 1}[i], 0, 20);
             toolDropsMax = b.comment("Random enchanted tools dropped per kill (maximum).")
-                    .defineInRange("toolDropsMax", new int[]{0, 0, 0, 3}[i], 0, 20);
+                    .defineInRange("toolDropsMax", new int[]{0, 0, 0, 2}[i], 0, 20);
             toolEnchantMin = b.comment("How many enchantments each dropped tool tries to get (minimum, limited by what is compatible).")
-                    .defineInRange("toolEnchantMin", new int[]{1, 1, 1, 4}[i], 0, 30);
+                    .defineInRange("toolEnchantMin", new int[]{1, 1, 1, 3}[i], 0, 30);
             toolEnchantMax = b.comment("How many enchantments each dropped tool tries to get (maximum).")
-                    .defineInRange("toolEnchantMax", new int[]{1, 1, 1, 7}[i], 0, 30);
+                    .defineInRange("toolEnchantMax", new int[]{1, 1, 1, 5}[i], 0, 30);
             toolTopLevel = b.comment("Top level for enchantments that have more than one level (Efficiency, Fortune, Sharpness...).",
-                    "It is always at least the vanilla max of that enchantment, so 10 gives Fortune 10 / Efficiency 10.",
+                    "It is always at least the vanilla max of that enchantment, so 6 gives Fortune 6 / Efficiency 6.",
                     "Single-level enchantments (Mending, Silk Touch...) stay level 1. 0 = never above the vanilla max.")
-                    .defineInRange("toolTopLevel", new int[]{0, 0, 0, 10}[i], 0, 255);
+                    .defineInRange("toolTopLevel", new int[]{0, 0, 0, 6}[i], 0, 255);
             toolMaxLevelChance = b.comment("Chance that an enchantment on a dropped tool rolls exactly its top level.",
                     "Otherwise it rolls between toolMinLevelFraction x top and the top.")
                     .defineInRange("toolMaxLevelChance", new double[]{0.25, 0.25, 0.25, 0.25}[i], 0.0, 1.0);
@@ -330,23 +330,23 @@ public final class AscensionConfig {
                         "minecraft:trident", "minecraft:bow", "minecraft:crossbow"}};
         private static final String[][] GUARANTEED_LOOT = {
                 {"minecraft:experience_bottle|1.0|1|2"},
+                {"minecraft:experience_bottle|1.0|1|2",
+                        "minecraft:diamond|1.0|0|1"},
                 {"minecraft:experience_bottle|1.0|2|3",
-                        "minecraft:diamond|1.0|1|1"},
-                {"minecraft:experience_bottle|1.0|2|4",
-                        "minecraft:diamond|1.0|2|3",
+                        "minecraft:diamond|1.0|1|2",
                         "minecraft:golden_apple|1.0|1|1"},
-                {"minecraft:diamond|1.0|8|14",
-                        "minecraft:netherite_ingot|1.0|2|2",
-                        "minecraft:netherite_scrap|1.0|1|2",
-                        "minecraft:diamond_block|1.0|1|2",
-                        "minecraft:ender_pearl|1.0|2|4",
+                {"minecraft:diamond|1.0|4|8",
+                        "minecraft:netherite_ingot|1.0|1|1",
+                        "minecraft:netherite_scrap|1.0|0|1",
+                        "minecraft:diamond_block|1.0|0|1",
+                        "minecraft:ender_pearl|1.0|1|3",
                         "minecraft:enchanted_book|1.0|1|1|mending=1",
-                        "minecraft:enchanted_golden_apple|1.0|2|3",
-                        "minecraft:golden_apple|1.0|4|6",
-                        "minecraft:emerald|1.0|10|18",
-                        "minecraft:experience_bottle|1.0|8|14",
-                        "minecraft:lapis_lazuli|1.0|8|16",
-                        "minecraft:gold_ingot|1.0|4|8"}};
+                        "minecraft:enchanted_golden_apple|1.0|1|1",
+                        "minecraft:golden_apple|1.0|2|3",
+                        "minecraft:emerald|1.0|6|10",
+                        "minecraft:experience_bottle|1.0|4|8",
+                        "minecraft:lapis_lazuli|1.0|4|8",
+                        "minecraft:gold_ingot|1.0|2|4"}};
         private static final String[][] REWARD_POOL = {
                 {"minecraft:iron_ingot|12|1|2", "minecraft:gold_ingot|8|1|1", "minecraft:emerald|6|1|1",
                         "minecraft:cooked_beef|10|2|4",
@@ -360,7 +360,7 @@ public final class AscensionConfig {
                         "minecraft:ender_pearl|5|1|2", "minecraft:experience_bottle|6|1|3",
                         "minecraft:shield|3|1|1|unbreaking=2,mending=1",
                         "minecraft:enchanted_book|2|1|1|unbreaking=3"},
-                {"minecraft:diamond|8|2|4", "minecraft:netherite_scrap|4|1|2",
+                {"minecraft:diamond|8|1|3", "minecraft:netherite_scrap|3|1|1",
                         "minecraft:golden_apple|6|1|1", "minecraft:enchanted_golden_apple|1|1|1",
                         "minecraft:totem_of_undying|1|1|1",
                         "minecraft:shield|3|1|1|unbreaking=3,mending=1",
@@ -373,11 +373,11 @@ public final class AscensionConfig {
                         "minecraft:enchanted_book|3|1|1|feather_falling=4", "minecraft:enchanted_book|3|1|1|thorns=3"}};
         private static final String[][] BONUS_LOOT = {
                 {"minecraft:iron_ingot|0.35|1|2"},
-                {"minecraft:diamond|0.15|1|1", "minecraft:emerald|0.35|1|1", "minecraft:golden_apple|0.10|1|1"},
-                {"minecraft:netherite_scrap|0.12|1|1", "minecraft:golden_apple|0.20|1|1",
-                        "minecraft:ender_pearl|0.35|1|1"},
-                {"minecraft:beacon|0.10|1|1", "minecraft:nether_star|0.12|1|1", "minecraft:elytra|0.01|1|1",
-                        "minecraft:totem_of_undying|0.45|1|1", "minecraft:enchanted_book|0.50|1|1|unbreaking=3",
-                        "minecraft:netherite_scrap|0.45|1|3", "minecraft:diamond_block|0.40|1|2"}};
+                {"minecraft:diamond|0.10|1|1", "minecraft:emerald|0.25|1|1", "minecraft:golden_apple|0.06|1|1"},
+                {"minecraft:netherite_scrap|0.08|1|1", "minecraft:golden_apple|0.15|1|1",
+                        "minecraft:ender_pearl|0.25|1|1"},
+                {"minecraft:beacon|0.05|1|1", "minecraft:nether_star|0.06|1|1", "minecraft:elytra|0.005|1|1",
+                        "minecraft:totem_of_undying|0.25|1|1", "minecraft:enchanted_book|0.30|1|1|unbreaking=3",
+                        "minecraft:netherite_scrap|0.25|1|2", "minecraft:diamond_block|0.25|1|2"}};
     }
 }
