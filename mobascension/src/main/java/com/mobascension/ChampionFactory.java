@@ -22,6 +22,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +54,8 @@ public final class ChampionFactory {
 
     public static boolean isEligible(Mob mob) {
         if (!AscensionConfig.ENABLED.get()) return false;
-        if (mob instanceof Warden || mob instanceof EnderDragon || mob instanceof WitherBoss) return false;
+        if (mob instanceof Warden || mob instanceof EnderDragon || mob instanceof WitherBoss
+                || mob instanceof Creeper || mob instanceof Vex) return false;
         if (ChampionData.isMinion(mob)) return false;
 
         ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
@@ -123,7 +126,6 @@ public final class ChampionFactory {
         mob.setHealth(mob.getMaxHealth());
 
         if (cfg.fireResistant.get()) infinite(mob, MobEffects.FIRE_RESISTANCE);
-        if (random.nextDouble() < cfg.weaving.get()) infinite(mob, MobEffects.WEAVING);
         if (random.nextDouble() < cfg.infested.get()) infinite(mob, MobEffects.INFESTED);
         if (random.nextDouble() < cfg.oozing.get()) infinite(mob, MobEffects.OOZING);
         if (rank == Rank.APEX) {

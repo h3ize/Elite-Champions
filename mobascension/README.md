@@ -13,13 +13,13 @@ Apex champions are the true threat: they hunt you down, hurl wither skulls and f
 | Mythic  | Purple | 7 - 11              | ~0.5%      | 3         | +210-330%    | +98-154%     |
 | Apex    | Gold   | 10 - 14             | ~0.11%     | 4         | +400-560%    | +180-252%    |
 
-About 92% of spawns stay normal mobs. The Warden, Ender Dragon and Wither can never ascend. Mobs from spawners, trial spawners, breeding, buckets and conversions are excluded by default.
+About 92% of spawns stay normal mobs. The Warden, Ender Dragon, Wither, Creeper and Vex can never ascend. Mobs from spawners, trial spawners, breeding, buckets and conversions are excluded by default.
 
 ### How champions work
 - **Random power:** every champion rolls its own stat level inside its rank's range, so no two are exactly alike
 - **Stats:** extra health, armor, toughness, movement speed, attack damage, knockback resistance, safe fall distance and body size; immune to fire and lava
 - **Ranged damage:** the damage bonus also applies to arrows, tridents and fireballs
-- **Effects:** permanent Weaving, Infested or Oozing, with higher ranks more likely to roll them (5% / 10% / 20% / 35% each)
+- **Effects:** permanent Infested or Oozing, with higher ranks more likely to roll them (5% / 10% / 20% / 35% each)
 - **Presence:** rank-coloured particle aura, rank in the mob's name (e.g. "Veteran Zombie"), and a coloured glow outline on Apex when they spawn
 - **Announcements:** Apex spawns are announced to nearby players; Mythic and Apex deaths set off fireworks
 - **Gear:** champions are armed and armoured by rank (leather and chainmail up to netherite), with random vanilla armor trims and enchantments capped per rank

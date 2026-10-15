@@ -44,9 +44,9 @@ public final class AscensionConfig {
         VANILLA_ONLY = b.comment("Only mobs from vanilla Minecraft can ascend (mobs added by other mods never do).")
                 .define("vanillaMobsOnly", true);
         BLACKLIST = b.comment("Entity types that can never become champions.",
-                "Warden, Ender Dragon and Wither are ALWAYS excluded in code as well.")
+                "Warden, Ender Dragon, Wither, Creeper and Vex are ALWAYS excluded in code as well.")
                 .defineListAllowEmpty("blacklist",
-                        List.of("minecraft:warden", "minecraft:ender_dragon", "minecraft:wither"),
+                        List.of("minecraft:warden", "minecraft:ender_dragon", "minecraft:wither", "minecraft:creeper", "minecraft:vex"),
                         () -> "minecraft:warden", o -> o instanceof String);
         WHITELIST = b.comment("If not empty, ONLY these entity types can become champions. Leave empty for all mobs.")
                 .defineListAllowEmpty("whitelist", List.of(), () -> "minecraft:zombie", o -> o instanceof String);
@@ -130,7 +130,7 @@ public final class AscensionConfig {
                 fall, size, xp, bookLevelMult, bookMinFraction, toolMaxLevelChance, toolMinFraction;
 
         public final ModConfigSpec.IntValue abilityCount;
-        public final ModConfigSpec.DoubleValue weaving, infested, oozing;
+        public final ModConfigSpec.DoubleValue infested, oozing;
         public final ModConfigSpec.BooleanValue fireResistant;
 
         public final ModConfigSpec.IntValue glowSeconds;
@@ -184,8 +184,6 @@ public final class AscensionConfig {
             abilityCount = b.comment("How many special abilities this rank rolls (limited by what's enabled).")
                     .defineInRange("abilityCount", i + 1, 0, 10);
             fireResistant = b.comment("Immune to fire and lava.").define("fireResistant", true);
-            weaving = b.comment("Chance to spawn Weaving (infinite).")
-                    .defineInRange("weavingChance", new double[]{0.05, 0.10, 0.20, 0.35}[i], 0.0, 1.0);
             infested = b.comment("Chance to spawn Infested (infinite).")
                     .defineInRange("infestedChance", new double[]{0.05, 0.10, 0.20, 0.35}[i], 0.0, 1.0);
             oozing = b.comment("Chance to spawn Oozing (infinite).")
